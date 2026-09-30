@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Gym tracker — design mockup (Home + Active workout)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== Design tokens ===== */
+:root {
+  --bg: #000000;
+  --surface-1: #111113;
+  --surface-2: #1c1c1f;
+  --surface-3: #2a2a2e;
+  --border: #26262a;
+  --text-1: #ffffff;
+  --text-2: #a1a1a6;
+  --text-3: #6b6b70;
+  --accent: #f5c542;          /* records + streak ONLY */
+  --accent-dim: rgba(245, 197, 66, 0.14);
+  --danger: #ff453a;          /* destructive confirmations ONLY */
+
+  --r-card: 20px;
+  --r-btn: 14px;
+  --r-pill: 999px;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px;
+
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: #0a0a0a; color: var(--text-1); font-family: var(--font);
+  font-feature-settings: "tnum" 1, "cv11" 1; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input { font: inherit; color: inherit; }
+
+.phone { max-width: 430px; height: 100dvh; margin: 0 auto; background: var(--bg);
+  display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.scroll { flex: 1; overflow-y: auto; padding: 0 var(--s4) var(--s6); }
+.hidden { display: none !important; }
+
+/* ===== Typography ===== */
+.t-display { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.t-title { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.t-body { font-size: 16px; }
+.t-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); }
+.t-meta { font-size: 14px; color: var(--text-2); }
+
+/* ===== Components ===== */
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-card); padding: var(--s4); }
+.btn { height: 56px; border-radius: var(--r-btn); font-weight: 600; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; gap: var(--s2); transition: transform .12s var(--ease); }
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--text-1); color: #000; }
+.btn-secondary { background: var(--surface-2); color: var(--text-1); border: 1px solid var(--surface-3); }
+.chip { height: 36px; padding: 0 14px; border-radius: var(--r-pill); background: var(--surface-2);
+  border: 1px solid var(--surface-3); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.chip.on { background: var(--text-1); color: #000; border-color: var(--text-1); }
+.icon-btn { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--surface-2);
+  display: grid; place-items: center; font-size: 18px; }
+
+/* Header */
+.hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--s4) 10px; gap: var(--s2); }
+.timer-chip { height: 40px; padding: 0 14px; border-radius: var(--r-pill); background: var(--surface-2);
+  border: 1px solid var(--surface-3); font-weight: 600; display: flex; align-items: center; gap: 8px; min-width: 104px; justify-content: center; }
+.timer-chip.running { background: var(--text-1); color: #000; }
+.timer-chip.done { animation: pulse .6s var(--ease) 3; }
+@keyframes pulse { 50% { transform: scale(1.08); } }
+
+/* Home */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.stack > * + * { margin-top: var(--s3); }
+.dots { display: flex; align-items: center; gap: 6px; margin: 14px 0 10px; flex-wrap: nowrap; }
+.dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+.dot.t { background: var(--text-1); }
+.dot.r { border: 2px solid var(--text-1); }
+.dot.e { background: var(--surface-3); width: 6px; height: 6px; margin: 0 4px; }
+.dot.today { border: 2px dashed var(--accent); }
+.streak-run { display: flex; gap: 6px; padding: 5px 7px; border-radius: var(--r-pill); background: var(--accent-dim); }
+.cov-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px; }
+.cov-bar { display: flex; gap: 3px; }
+.cov-bar i { width: 16px; height: 8px; border-radius: 3px; background: var(--surface-3); }
+.cov-bar i.on { background: var(--text-1); }
+.rec-row { display: flex; justify-content: space-between; font-size: 15px; padding: 8px 0; border-top: 1px solid var(--border); }
+.rec-row:first-of-type { border-top: 0; }
+.star { color: var(--accent); }
+.bottom-actions { display: grid; grid-template-columns: 1fr 2fr; gap: var(--s3); padding: var(--s3) var(--s4); }
+.resume-bar { margin: var(--s3) var(--s4); }
+
+/* Tab bar */
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); }
+.tab { height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 12px; color: var(--text-3); font-weight: 500; }
+.tab .ico { font-size: 20px; }
+.tab.on { color: var(--text-1); }
+
+/* Workout: exercise card */
+.ex { margin-top: var(--s3); padding: var(--s4) var(--s3) var(--s2); }
+.ex-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s2); padding: 0 var(--s1); }
+.ex-name { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.ex-meta { font-size: 14px; color: var(--text-2); margin-top: 4px; padding: 0 var(--s1); }
+.ex-meta .note { color: var(--text-3); font-style: italic; }
+.pin { font-size: 14px; color: var(--text-1); margin-top: 6px; padding: 0 var(--s1); }
+.trophy { width: 40px; height: 40px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; font-size: 18px; flex: none; }
+.cols { display: grid; grid-template-columns: 28px 40px 1fr 1fr 36px 56px; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text-3); padding: 14px 0 4px; }
+.cols span:nth-child(3), .cols span:nth-child(4) { text-align: center; }
+.set { display: grid; grid-template-columns: 28px 40px 1fr 1fr 36px 56px; align-items: center; gap: 4px; min-height: 60px;
+  border-radius: 14px; transition: background .2s var(--ease); }
+.set.logged { background: var(--surface-2); }
+.set-no { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+  font-weight: 700; font-size: 15px; background: var(--surface-2); border: 1px solid var(--surface-3); }
+.set.logged .set-no { background: var(--surface-3); }
+.set-no.w { color: var(--text-3); }
+.set-no.f { color: var(--danger); }
+.val { height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 22px; font-weight: 600; }
+.val small { font-size: 12px; color: var(--text-3); font-weight: 500; }
+.val.ghost { color: var(--text-3); }
+.val.active { outline: 2px solid var(--text-1); outline-offset: -2px; background: var(--surface-3); }
+.note-btn { width: 40px; height: 40px; display: grid; place-items: center; font-size: 16px; opacity: .45; }
+.note-btn.has { opacity: 1; }
+.check { width: 48px; height: 48px; border-radius: 14px; border: 2px solid var(--surface-3); display: grid; place-items: center;
+  font-size: 22px; font-weight: 700; color: var(--text-3); }
+.set.logged .check { background: var(--text-1); border-color: var(--text-1); color: #000; }
+.del { width: 28px; height: 40px; display: grid; place-items: center; color: var(--text-3); font-size: 16px; border-radius: 8px; }
+.del:active { color: var(--danger); background: var(--surface-3); }
+/* Record set: check square turns gold instead of white */
+.set.logged.rec .check { background: var(--accent); border-color: var(--accent); color: #000; }
+.trophy.gold { background: var(--accent); }
+/* Records button: golden rounded square (no emoji). Turns into a gold tile with a black square when a record was set this workout. */
+.rec-sq { width: 16px; height: 16px; border-radius: 5px; background: var(--accent); box-shadow: 0 0 10px rgba(245,197,66,.35); flex: none; }
+.trophy.gold .rec-sq { background: #000; box-shadow: none; }
+.set.poof { animation: poof .18s ease-in forwards; }
+@keyframes poof { to { opacity: 0; transform: scale(.9); } }
+.snack { position: absolute; left: var(--s4); right: var(--s4); bottom: 92px; z-index: 25; height: 52px; border-radius: 14px;
+  background: var(--surface-3); display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 16px;
+  font-size: 15px; animation: fade .18s var(--ease); }
+.snack button { height: 40px; padding: 0 14px; font-weight: 700; color: var(--text-1); }
+.add-set { width: 100%; height: 44px; color: var(--text-2); font-weight: 600; font-size: 15px; margin-top: 4px; }
+.footer { padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: var(--bg); }
+.hint { font-size: 13px; color: var(--text-3); text-align: center; margin-top: var(--s4); line-height: 1.5; }
+
+/* Sheets / overlays */
+.backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.6); z-index: 20; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface-1); border-top-left-radius: 24px; border-top-right-radius: 24px;
+  border-top: 1px solid var(--surface-3); z-index: 21; animation: up .22s var(--ease); max-height: 88%; display: flex; flex-direction: column; }
+@keyframes up { from { transform: translateY(100%); } }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--surface-3); margin: 8px auto 4px; }
+
+/* Number pad */
+.pad-top { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--s3); padding: var(--s3) var(--s4); }
+.pad-field { background: var(--surface-2); border-radius: 14px; padding: 8px; border: 2px solid transparent; }
+.pad-field.on { border-color: var(--text-1); }
+.pad-field .t-label { font-size: 11px; text-align: center; }
+.pad-field .row { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+.pad-field .num { font-size: 30px; font-weight: 700; text-align: center; flex: 1; min-height: 38px; }
+.step { width: 44px; height: 44px; border-radius: 12px; background: var(--surface-3); font-size: 22px; font-weight: 600; }
+.keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 var(--s4); }
+.key { height: 60px; border-radius: 14px; background: var(--surface-2); font-size: 26px; font-weight: 600; }
+.key:active { background: var(--surface-3); }
+.pad-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--s3); padding: var(--s3) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom)); }
+
+/* Picker */
+.search { width: 100%; height: 48px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--surface-3); padding: 0 16px; font-size: 16px; outline: none; }
+.search:focus { border-color: var(--text-1); }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: var(--s3) 0 var(--s2); scrollbar-width: none; }
+.list-item { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 56px; padding: 0 4px;
+  border-bottom: 1px solid var(--border); text-align: left; font-size: 16px; }
+.list-item small { color: var(--text-3); font-size: 13px; }
+
+/* Popovers + toast */
+.pop { position: absolute; left: var(--s4); right: var(--s4); top: 18%; z-index: 21; background: var(--surface-1);
+  border: 1px solid var(--surface-3); border-radius: var(--r-card); padding: var(--s5); animation: fade .18s var(--ease); }
+@keyframes fade { from { opacity: 0; transform: scale(.96); } }
+.pop-row { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--border); }
+.pop-row:first-of-type { border-top: 0; }
+.celebrate { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.72); display: grid; place-items: center; animation: fade .2s var(--ease); }
+.cel-card { position: relative; width: calc(100% - 40px); border-radius: 28px; padding: 28px 22px 22px; text-align: center; overflow: hidden;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(245,197,66,.28), transparent 60%), var(--surface-1);
+  border: 1px solid rgba(245,197,66,.55); box-shadow: 0 0 60px rgba(245,197,66,.18); animation: pop .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } }
+.cel-title { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; }
+.cel-ex { font-size: 15px; color: var(--text-2); margin-top: 4px; }
+.cel-trophy { display: block; width: 150px; height: 150px; margin: 10px auto 0; animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
+.ribbon { display: inline-block; margin-top: -18px; position: relative; background: #fff; color: #000; font-weight: 800; letter-spacing: .12em;
+  font-size: 13px; padding: 7px 22px; clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); }
+.cel-delta { font-size: 44px; font-weight: 800; color: var(--accent); letter-spacing: -0.03em; margin-top: 12px; }
+.cel-ba { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 14px; }
+.cel-ba .d { font-size: 13px; color: var(--text-2); font-weight: 600; }
+.cel-ba .v { font-size: 24px; font-weight: 800; margin-top: 2px; }
+.cel-ba .v.old { color: var(--text-2); }
+.cel-arrow { color: var(--accent); font-size: 20px; }
+.spark { position: absolute; color: var(--accent); font-size: 16px; animation: twinkle 1.2s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: .2; transform: scale(.6); } }
+.cel-ok { margin-top: 22px; width: 100%; }
+
+.placeholder { display: grid; place-items: center; height: 60%; color: var(--text-3); text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+</style>
+</head>
+<body>
+<div class="phone"><div id="app" style="display:contents"></div><div id="toast"></div></div>
+
+<script>
+/* ===== Mock data ===== */
+const LIBRARY = [
+  { name: 'Rope Tricep Pushdown', tags: ['Triceps', 'Cable', 'Isolation'] },
+  { name: 'Cable Lat Raise', tags: ['Shoulders', 'Cable', 'Isolation'] },
+  { name: 'Bench Press', tags: ['Chest', 'Barbell', 'Compound'] },
+  { name: 'Incline Dumbbell Press', tags: ['Chest', 'Dumbbell', 'Compound'] },
+  { name: 'Pec Fly', tags: ['Chest', 'Machine', 'Isolation'] },
+  { name: 'Lat Pulldown', tags: ['Back', 'Cable', 'Compound'] },
+  { name: 'Pulley Row', tags: ['Back', 'Cable', 'Compound'] },
+  { name: 'Deadlift', tags: ['Back', 'Legs', 'Barbell', 'Compound'] },
+  { name: 'Squat', tags: ['Legs', 'Barbell', 'Compound'] },
+  { name: 'Leg Press', tags: ['Legs', 'Machine', 'Compound'] },
+  { name: 'Shoulder Press', tags: ['Shoulders', 'Dumbbell', 'Compound'] },
+  { name: 'Barbell Curl', tags: ['Biceps', 'Barbell', 'Isolation'] },
+  { name: 'Pull-up', tags: ['Back', 'Bodyweight', 'Compound'] },
+  { name: 'Plank', tags: ['Abs', 'Bodyweight'] },
+];
+const RECENT = { 'Rope Tricep Pushdown': '2d ago', 'Cable Lat Raise': '6d ago', 'Squat': '2d ago', 'Lat Pulldown': '6d ago' };
+const TAGS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Triceps', 'Biceps', 'Abs', 'Machine', 'Cable', 'Barbell', 'Dumbbell', 'Bodyweight', 'Compound', 'Isolation'];
+
+// Past working sets per exercise (used for record detection + trophy)
+const HISTORY = {
+  'Rope Tricep Pushdown': [
+    { w: 50, r: 9, d: '22 Sep 2026' }, { w: 50, r: 8, d: '22 Sep 2026' },
+    { w: 40, r: 12, d: '24 Sep 2026' }, { w: 45, r: 10, d: '28 Sep 2026' }, { w: 45, r: 8, d: '28 Sep 2026' },
+  ],
+  'Cable Lat Raise': [
+    { w: 20, r: 8, d: '03 Nov 2025' }, { w: 15, r: 15, d: '06 Jan 2026' },
+    { w: 20, r: 6, d: '24 Sep 2026' }, { w: 15, r: 12, d: '24 Sep 2026' },
+  ],
+};
+const LAST = {
+  'Rope Tricep Pushdown': { date: '28 Sep', sets: [[45, 10], [45, 8]], note: 'elbow felt tight' },
+  'Cable Lat Raise': { date: '24 Sep', sets: [[20, 6], [15, 12]], note: null },
+};
+const PINS = { 'Rope Tricep Pushdown': 'Rope attachment, pin 9' };
+
+/* ===== State ===== */
+const S = {
+  tab: 'home',
+  view: 'home',            // 'home' | 'workout'
+  workout: null,           // { start, exercises: [] }
+  pad: null,               // { ei, si, field, buf, fresh }
+  picker: null,            // { q, tag }
+  trophy: null,            // exercise index
+  rest: { dur: 90, endAt: null },
+};
+
+function newExercise(name) {
+  const last = LAST[name];
+  const sets = last
+    ? last.sets.map(([w, r]) => ({ w, r, type: 'work', logged: false, ghost: true, rec: null, note: '' }))
+    : [{ w: null, r: null, type: 'work', logged: false, ghost: false, rec: null, note: '' }];
+  return { name, sets };
+}
+
+/* ===== Helpers ===== */
+const fmtW = w => w == null ? '—' : (Number.isInteger(w * 10) ? w.toFixed(1) : String(w));
+const fmtT = s => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+// All prior working sets for an exercise: history + logged sets this session (excluding one index)
+function priorSets(ex, exceptIdx) {
+  const past = (HISTORY[ex.name] || []).map(s => ({ w: s.w, r: s.r, d: s.d }));
+  ex.sets.forEach((s, i) => { if (i !== exceptIdx && s.logged && s.type !== 'warm') past.push({ w: s.w, r: s.r, d: 'Today' }); });
+  return past;
+}
+
+// Weight record: heavier than ever. Rep record: more reps than ever at this weight OR heavier.
+function detectRecord(ex, si) {
+  const set = ex.sets[si];
+  if (set.type === 'warm') return null;
+  const prior = priorSets(ex, si);
+  if (!prior.length) return null;  // first time ever: nothing to beat
+  const heaviest = prior.reduce((a, b) => (b.w > a.w ? b : a));
+  if (set.w > heaviest.w) return { kind: 'weight', name: ex.name, delta: `+${fmtW(set.w - heaviest.w)} kg`,
+    before: { d: heaviest.d, v: `${fmtW(heaviest.w)} kg` }, after: { d: 'Today', v: `${fmtW(set.w)} kg` } };
+  const atOrAbove = prior.filter(p => p.w >= set.w);
+  const best = atOrAbove.reduce((a, b) => (b.r > a.r ? b : a));
+  if (set.r > best.r) return { kind: 'reps', name: ex.name, delta: `+${set.r - best.r} rep${set.r - best.r > 1 ? 's' : ''}`,
+    before: { d: best.d, v: `${fmtW(best.w)} × ${best.r}` }, after: { d: 'Today', v: `${fmtW(set.w)} × ${set.r}` } };
+  return null;
+}
+
+function trophyData(ex) {
+  const all = priorSets(ex, -1);
+  if (!all.length) return null;
+  const maxW = all.reduce((a, b) => (b.w > a.w || (b.w === a.w && b.r > a.r) ? b : a));
+  const maxR = all.reduce((a, b) => (b.r > a.r || (b.r === a.r && b.w > a.w) ? b : a));
+  const curW = (ex.sets.find(s => !s.logged) || ex.sets[ex.sets.length - 1]).w;
+  const atCur = all.filter(p => p.w === curW);
+  const bestAtCur = atCur.length ? Math.max(...atCur.map(p => p.r)) : null;
+  return { maxW, maxR, curW, bestAtCur };
+}
+
+/* ===== Actions ===== */
+function logSet(ei, si) {
+  const ex = S.workout.exercises[ei];
+  const set = ex.sets[si];
+  if (set.logged) { set.logged = false; set.rec = null; render(); return; }  // tap again = un-log
+  if (set.w == null || set.r == null) { openPad(ei, si, set.w == null ? 'w' : 'r'); return; }
+  set.logged = true; set.ghost = false;
+  const rec = detectRecord(ex, si);
+  set.rec = rec ? rec.kind : null;
+  if (si === ex.sets.length - 1) ex.sets.push({ w: set.w, r: set.r, type: 'work', logged: false, ghost: true, rec: null, note: '' });
+  buzz(rec ? [30, 60, 30] : 12);
+  if (rec) showCelebration(rec);
+  S.pad = null;
+  render();
+}
+
+function openPad(ei, si, field) {
+  const set = S.workout.exercises[ei].sets[si];
+  S.pad = { ei, si, field, buf: set[field] == null ? '' : (field === 'w' ? fmtW(set[field]) : String(set[field])), fresh: true };
+  render();
+}
+function commitPad() {
+  const p = S.pad; if (!p) return;
+  const set = S.workout.exercises[p.ei].sets[p.si];
+  const v = parseFloat(p.buf);
+  set[p.field] = isNaN(v) ? null : (p.field === 'r' ? Math.round(v) : v);
+  set.ghost = false;
+}
+function padKey(k) {
+  const p = S.pad;
+  if (k === 'del') { p.buf = p.fresh ? '' : p.buf.slice(0, -1); p.fresh = false; }
+  else if (k === '.') { if (p.field === 'r') return; if (p.fresh) p.buf = '0.'; else if (!p.buf.includes('.')) p.buf += '.'; p.fresh = false; }
+  else { p.buf = p.fresh ? k : (p.buf === '0' ? k : p.buf + k); p.fresh = false; if (p.buf.length > 6) p.buf = p.buf.slice(0, 6); }
+  commitPad(); render();
+}
+function padStep(dir) {
+  const p = S.pad;
+  const step = p.field === 'w' ? 2.5 : 1;
+  const cur = parseFloat(p.buf) || 0;
+  const next = Math.max(0, Math.round((cur + dir * step) * 100) / 100);
+  p.buf = p.field === 'w' ? fmtW(next) : String(next); p.fresh = true;
+  commitPad(); render();
+}
+
+// Celebration lives outside #app so re-renders underneath don't restart it
+const TROPHY_SVG = `<svg class="cel-trophy" viewBox="0 0 120 120" aria-hidden="true">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#f5c542"/><stop offset="1" stop-color="#c9951c"/></linearGradient></defs>
+  <path d="M34 22h52v18c0 20-11 34-26 34S34 60 34 40z" fill="url(#g)"/>
+  <path d="M34 28H20c0 16 8 24 18 25M86 28h14c0 16-8 24-18 25" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round"/>
+  <rect x="54" y="72" width="12" height="16" fill="url(#g)"/><rect x="40" y="88" width="40" height="10" rx="3" fill="url(#g)"/>
+  <rect x="34" y="98" width="52" height="8" rx="3" fill="#c9951c"/>
+  <path d="M46 30c0 14 4 24 10 30" stroke="#fff6d6" stroke-width="4" stroke-linecap="round" fill="none" opacity=".6"/></svg>`;
+function showCelebration(rec) {
+  const host = document.getElementById('toast');
+  const sparks = [[10, 16], [86, 12], [8, 50], [90, 44], [18, 30], [80, 30]].map(([x, y], i) =>
+    `<span class="spark" style="left:${x}%;top:${y}%;animation-delay:${i * .18}s">✦</span>`).join('');
+  host.innerHTML = `<div class="celebrate"><div class="cel-card" role="alertdialog" aria-label="New record">
+    ${sparks}
+    <div class="cel-title">New record</div>
+    <div class="cel-ex">${esc(rec.name)}</div>
+    ${TROPHY_SVG}
+    <div class="ribbon">NEW ${rec.kind === 'weight' ? 'WEIGHT' : 'REP'} RECORD</div>
+    <div class="cel-delta">${rec.delta}</div>
+    <div class="cel-ba">
+      <div><div class="d">${rec.before.d}</div><div class="v old">${rec.before.v}</div></div>
+      <div class="cel-arrow">▶</div>
+      <div><div class="d">${rec.after.d}</div><div class="v">${rec.after.v}</div></div>
+    </div>
+    <button class="btn btn-primary cel-ok">OK</button>
+  </div></div>`;
+}
+
+let undo = null;  // { ei, si, set, t } — last deleted set, restorable for 5 s
+function deleteSet(ei, si) {
+  const row = document.querySelector(`[data-row="${ei}-${si}"]`);
+  const doIt = () => {
+    const [set] = S.workout.exercises[ei].sets.splice(si, 1);
+    clearTimeout(undo && undo.t);
+    undo = { ei, si, set, t: setTimeout(() => { undo = null; render(); }, 5000) };
+    buzz(8); render();
+  };
+  if (row) { row.classList.add('poof'); setTimeout(doIt, 170); } else doIt();
+}
+
+function toggleRest() {
+  if (S.rest.endAt) { S.rest.endAt = null; }
+  else { S.rest.endAt = Date.now() + S.rest.dur * 1000; }
+  render();
+}
+
+/* ===== Render ===== */
+function render() {
+  const app = document.getElementById('app');
+  const scrollEl = app.querySelector('.scroll');
+  const keep = scrollEl ? scrollEl.scrollTop : 0;
+  app.innerHTML = S.view === 'workout' ? workoutView() : homeShell();
+  const sc = app.querySelector('.scroll'); if (sc) sc.scrollTop = keep;
+  const inp = app.querySelector('.search[data-focus]'); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  tick();
+}
+
+function homeShell() {
+  let body;
+  if (S.tab === 'home') body = homeView();
+  else body = `<div class="scroll"><div class="placeholder"><div><div class="t-h2">${S.tab[0].toUpperCase() + S.tab.slice(1)}</div><p class="t-meta">Not included in this mockup.<br>Wireframed in Part 2.</p></div></div></div>`;
+  const tabs = [['home', '⌂', 'Home'], ['history', '▦', 'History'], ['exercises', '☰', 'Exercises'], ['body', '◔', 'Body']];
+  return body + `<nav class="tabs">${tabs.map(([k, i, l]) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-a="tab" data-k="${k}"><span class="ico">${i}</span>${l}</button>`).join('')}</nav>`;
+}
+
+function homeView() {
+  const days = ['e', 't', 't', 'e', 't', 't', 't', 'r', 't', 't', 't', 't', 't'];
+  // current streak = trailing non-empty run
+  let cut = days.length; while (cut > 0 && days[cut - 1] !== 'e') cut--;
+  const before = days.slice(0, cut).map(d => `<span class="dot ${d}"></span>`).join('');
+  const run = days.slice(cut).map(d => `<span class="dot ${d}"></span>`).join('') + `<span class="dot today"></span>`;
+  const streak = days.length - cut;
+  const cov = [['Chest', 2], ['Back', 1], ['Legs', 2], ['Shoulders', 0], ['Arms', 2]];
+  const active = !!S.workout;
+  return `
+  <div class="hdr"><div><div class="t-meta">Wed 30 Sep</div><div class="t-title">Today</div></div><button class="icon-btn" aria-label="Settings">⚙</button></div>
+  <div class="scroll stack">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="t-label">Streak</span><span class="t-meta">best 21</span></div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="t-display">${streak}</span><span class="t-h2" style="color:var(--text-2)">days</span></div>
+      <div class="dots">${before}<span class="streak-run">${run}</span></div>
+      <div class="t-meta">● trained &nbsp; ○ rest &nbsp;·&nbsp; Rest days in a row: 0 / 3</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <span class="t-label">This week</span>
+        ${cov.map(([m, n]) => `<div class="cov-row"><span>${m}</span><span class="cov-bar"><i class="${n > 0 ? 'on' : ''}"></i><i class="${n > 1 ? 'on' : ''}"></i></span><span style="color:var(--text-2);width:10px;text-align:right">${n}</span></div>`).join('')}
+      </div>
+      <div class="card" style="display:flex;flex-direction:column">
+        <span class="t-label">Body weight</span>
+        <div style="margin-top:10px"><span style="font-size:34px;font-weight:700;letter-spacing:-.02em">82.4</span> <span class="t-meta">kg</span></div>
+        <div class="t-meta">▼ 0.6 this week</div>
+        <svg viewBox="0 0 120 40" style="margin-top:auto;width:100%;height:44px" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#6b6b70" stroke-width="1.5" points="0,12 12,10 24,16 36,14 48,18 60,17 72,22 84,21 96,26 108,24 120,28"/>
+          <polyline fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" points="0,12 20,13 40,15 60,18 80,21 100,24 120,26"/>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <span class="t-label">Recent records</span>
+      <div style="margin-top:6px">
+        <div class="rec-row"><span><span class="star">★</span> Rope Tricep Pushdown</span><span class="t-meta">45 × 11 · today</span></div>
+        <div class="rec-row"><span><span class="star">★</span> Squat</span><span class="t-meta">100 × 6 · 2d</span></div>
+        <div class="rec-row"><span><span class="star">★</span> Lat Pulldown</span><span class="t-meta">65 kg · 6d</span></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px">
+      <span class="t-meta">ⓘ Weekly check-in due</span><button class="chip">Check in</button>
+    </div>
+  </div>
+  ${active
+    ? `<div class="resume-bar"><button class="btn btn-primary" style="width:100%" data-a="resume">● Resume workout · <span data-elapsed></span></button></div>`
+    : `<div class="bottom-actions"><button class="btn btn-secondary">Rest day</button><button class="btn btn-primary" data-a="start">▶ Start workout</button></div>`}`;
+}
+
+function workoutView() {
+  const w = S.workout;
+  const restLeft = S.rest.endAt ? Math.ceil((S.rest.endAt - Date.now()) / 1000) : null;
+  const exHtml = w.exercises.map((ex, ei) => {
+    const last = LAST[ex.name]; const pin = PINS[ex.name];
+    const rows = ex.sets.map((s, si) => {
+      const act = f => S.pad && S.pad.ei === ei && S.pad.si === si && S.pad.field === f ? 'active' : '';
+      const ghost = s.ghost && !s.logged ? 'ghost' : '';
+      const workIdx = ex.sets.slice(0, si + 1).filter(x => x.type !== 'warm').length;
+      const label = s.type === 'warm' ? 'W' : s.type === 'fail' ? 'F' : workIdx;
+      return `<div class="set ${s.logged ? 'logged' : ''} ${s.logged && s.rec ? 'rec' : ''}" data-row="${ei}-${si}">
+        <button class="del" data-a="del" data-e="${ei}" data-s="${si}" aria-label="Delete set">✕</button>
+        <button class="set-no ${s.type === 'warm' ? 'w' : s.type === 'fail' ? 'f' : ''}" data-a="type" data-e="${ei}" data-s="${si}" aria-label="Set type">${label}</button>
+        <button class="val ${ghost} ${act('w')}" data-a="pad" data-e="${ei}" data-s="${si}" data-f="w">${fmtW(s.w)}</button>
+        <button class="val ${ghost} ${act('r')}" data-a="pad" data-e="${ei}" data-s="${si}" data-f="r">${s.r == null ? '—' : s.r}</button>
+        <button class="note-btn" aria-label="Note">✎</button>
+        <button class="check" data-a="log" data-e="${ei}" data-s="${si}" aria-label="Log set">✓</button>
+      </div>`;
+    }).join('');
+    return `<div class="card ex">
+      <div class="ex-head"><div class="ex-name">${esc(ex.name)}</div>
+        <div style="display:flex;gap:6px"><button class="trophy ${ex.sets.some(x => x.logged && x.rec) ? 'gold' : ''}" data-a="trophy" data-e="${ei}" aria-label="Records"><span class="rec-sq"></span></button><button class="trophy" aria-label="More">⋯</button></div></div>
+      ${pin ? `<div class="pin">📌 ${esc(pin)}</div>` : ''}
+      <div class="ex-meta">${last ? `Last · ${last.date}: ${last.sets.map(([a, b]) => `${a}×${b}`).join(' · ')}${last.note ? `<br><span class="note">“${esc(last.note)}”</span>` : ''}` : 'First time — no history yet'}</div>
+      <div class="cols"><span></span><span>SET</span><span>KG</span><span>REPS</span><span></span><span></span></div>
+      ${rows}
+      <button class="add-set" data-a="addset" data-e="${ei}">＋ Add set</button>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="hdr">
+    <button class="chip" data-a="home" style="height:40px">‹ Home</button>
+    <span class="t-meta">● <span data-elapsed></span></span>
+    <button class="timer-chip ${S.rest.endAt ? 'running' : ''}" data-a="rest" data-rest>${restLeft != null ? '⏱ ' + fmtT(restLeft) : '⏱ ' + fmtT(S.rest.dur) + ' ▶'}</button>
+  </div>
+  <div class="scroll">
+    ${exHtml || `<div class="placeholder" style="height:50%"><div><div class="t-h2">Empty workout</div><p class="t-meta">Add your first exercise below.</p></div></div>`}
+    ${w.exercises.length ? `<p class="hint">Mockup tips: tap ✓ to log a set as shown · tap a number to edit it<br>tap the set number for Warm-up / Failure · ✕ deletes a set (with Undo) · try 45 kg × 11 reps for a record</p>
+      <button class="btn btn-secondary" style="width:100%;margin-top:16px" data-a="finish">Finish workout</button>` : ''}
+  </div>
+  <div class="footer"><button class="btn btn-primary" style="width:100%" data-a="picker">＋ Add exercise</button></div>
+  ${undo ? `<div class="snack"><span>Set deleted</span><button data-a="undo">Undo</button></div>` : ''}
+  ${S.pad ? padSheet() : ''}
+  ${S.picker ? pickerSheet() : ''}
+  ${S.trophy != null ? trophyPop() : ''}
+`;
+}
+
+function padSheet() {
+  const p = S.pad; const s = S.workout.exercises[p.ei].sets[p.si];
+  const wv = p.field === 'w' ? (p.buf || '—') : fmtW(s.w);
+  const rv = p.field === 'r' ? (p.buf || '—') : (s.r == null ? '—' : s.r);
+  const k = n => `<button class="key" data-a="key" data-k="${n}">${n === 'del' ? '⌫' : n}</button>`;
+  return `<div class="backdrop" data-a="padclose" style="background:rgba(0,0,0,.25)"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="pad-top">
+      <div class="pad-field ${p.field === 'w' ? 'on' : ''}" data-a="field" data-f="w"><div class="t-label">KG</div>
+        <div class="row"><button class="step" data-a="step" data-d="-1" ${p.field !== 'w' ? 'style="visibility:hidden"' : ''}>−</button><div class="num">${wv}</div><button class="step" data-a="step" data-d="1" ${p.field !== 'w' ? 'style="visibility:hidden"' : ''}>+</button></div></div>
+      <div class="pad-field ${p.field === 'r' ? 'on' : ''}" data-a="field" data-f="r"><div class="t-label">Reps</div>
+        <div class="row"><div class="num">${rv}</div></div></div>
+    </div>
+    <div class="keys">${['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', 'del'].map(k).join('')}</div>
+    <div class="pad-actions">
+      <button class="btn btn-secondary" data-a="next">${p.field === 'w' ? 'Next: reps →' : '← Weight'}</button>
+      <button class="btn btn-primary" data-a="padlog">✓ Log set</button>
+    </div>
+  </div>`;
+}
+
+function pickerSheet() {
+  const { q, tag } = S.picker;
+  const ql = q.trim().toLowerCase();
+  const inTag = e => !tag || e.tags.includes(tag) || (tag === 'Arms' && (e.tags.includes('Biceps') || e.tags.includes('Triceps')));
+  const hits = LIBRARY.filter(e => inTag(e) && (!ql || e.name.toLowerCase().includes(ql)));
+  const recent = !ql && !tag ? LIBRARY.filter(e => RECENT[e.name]) : [];
+  const item = e => `<button class="list-item" data-a="pick" data-n="${esc(e.name)}"><span>${esc(e.name)}<br><small>${e.tags.join(' · ')}</small></span><small>${RECENT[e.name] || ''}</small></button>`;
+  return `<div class="backdrop" data-a="pickclose"></div>
+  <div class="sheet" style="height:88%">
+    <div class="grab"></div>
+    <div style="padding:4px 16px 0;display:flex;justify-content:space-between;align-items:center"><span class="t-h2">Add exercise</span><button class="icon-btn" data-a="pickclose">✕</button></div>
+    <div style="padding:12px 16px 0"><input class="search" placeholder="🔍  Search exercises…" value="${esc(q)}" data-a="search" ${S.picker.focus ? 'data-focus' : ''}>
+      <div class="chips">${TAGS.map(t => `<button class="chip ${tag === t ? 'on' : ''}" data-a="tag" data-t="${t}">${t}</button>`).join('')}</div></div>
+    <div class="scroll" style="padding-top:0">
+      ${recent.length ? `<div class="t-label" style="margin:12px 0 4px">Recent</div>${recent.map(item).join('')}` : ''}
+      <div class="t-label" style="margin:16px 0 4px">${ql || tag ? `${hits.length} result${hits.length === 1 ? '' : 's'}` : 'All  A–Z'}</div>
+      ${hits.slice().sort((a, b) => a.name.localeCompare(b.name)).map(item).join('')}
+      ${ql && !LIBRARY.some(e => e.name.toLowerCase() === ql) ? `<button class="list-item" data-a="pick" data-n="${esc(q.trim().replace(/\b\w/g, c => c.toUpperCase()))}" style="color:var(--text-1);font-weight:600">＋ Create “${esc(q.trim())}”</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function trophyPop() {
+  const ex = S.workout.exercises[S.trophy];
+  const t = trophyData(ex);
+  return `<div class="backdrop" data-a="trophyclose"></div>
+  <div class="pop">
+    <div class="t-h2" style="margin-bottom:10px;display:flex;align-items:center;gap:10px"><span class="rec-sq"></span>${esc(ex.name)}</div>
+    ${t ? `
+    <div class="pop-row"><span class="t-meta">Max weight</span><span><b>${fmtW(t.maxW.w)} kg × ${t.maxW.r}</b><br><small class="t-meta">${t.maxW.d}</small></span></div>
+    <div class="pop-row"><span class="t-meta">Max reps</span><span><b>${t.maxR.r} @ ${fmtW(t.maxR.w)} kg</b><br><small class="t-meta">${t.maxR.d}</small></span></div>
+    <div class="pop-row"><span class="t-meta">At ${fmtW(t.curW)} kg</span><span><b>${t.bestAtCur != null ? `best ${t.bestAtCur} reps` : 'never done'}</b></span></div>`
+    : `<p class="t-meta">No records yet. Log a working set to set your first.</p>`}
+    <button class="btn btn-secondary" style="width:100%;margin-top:14px" data-a="trophyclose">Close</button>
+  </div>`;
+}
+
+/* ===== Live clocks (update text only, no re-render) ===== */
+function tick() {
+  if (S.workout) {
+    const el = Math.floor((Date.now() - S.workout.start) / 1000);
+    document.querySelectorAll('[data-elapsed]').forEach(n => n.textContent = fmtT(el));
+  }
+  const chip = document.querySelector('[data-rest]');
+  if (chip && S.rest.endAt) {
+    const left = Math.ceil((S.rest.endAt - Date.now()) / 1000);
+    if (left <= 0) { S.rest.endAt = null; buzz([200, 100, 200]); chip.classList.remove('running'); chip.classList.add('done'); chip.textContent = '⏱ ' + fmtT(S.rest.dur) + ' ▶'; }
+    else chip.textContent = '⏱ ' + fmtT(left);
+  }
+}
+setInterval(tick, 250);
+
+/* ===== Events ===== */
+document.addEventListener('click', e => {
+  if (e.target.closest('#toast')) { if (e.target.closest('.cel-ok') || !e.target.closest('.cel-card')) document.getElementById('toast').innerHTML = ''; return; }
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const a = b.dataset.a, ei = +b.dataset.e, si = +b.dataset.s;
+  switch (a) {
+    case 'tab': S.tab = b.dataset.k; break;
+    case 'start': S.workout = { start: Date.now() - 1000, exercises: [] }; S.view = 'workout'; break;
+    case 'resume': S.view = 'workout'; break;
+    case 'home': S.view = 'home'; S.tab = 'home'; S.pad = null; break;
+    case 'finish': if (confirm('Finish workout? (Summary screen is wireframed in Part 2.)')) { S.workout = null; S.view = 'home'; S.rest.endAt = null; } break;
+    case 'rest': toggleRest(); return;
+    case 'log': logSet(ei, si); return;
+    case 'del': deleteSet(ei, si); return;
+    case 'undo': if (undo) { clearTimeout(undo.t); S.workout.exercises[undo.ei].sets.splice(undo.si, 0, undo.set); undo = null; } break;
+    case 'pad': openPad(ei, si, b.dataset.f); return;
+    case 'padclose': S.pad = null; break;
+    case 'key': padKey(b.dataset.k); return;
+    case 'step': e.stopPropagation(); padStep(+b.dataset.d); return;
+    case 'field': S.pad.field = b.dataset.f; { const s = S.workout.exercises[S.pad.ei].sets[S.pad.si]; const v = s[S.pad.field]; S.pad.buf = v == null ? '' : (S.pad.field === 'w' ? fmtW(v) : String(v)); S.pad.fresh = true; } break;
+    case 'next': S.pad.field = S.pad.field === 'w' ? 'r' : 'w'; { const s = S.workout.exercises[S.pad.ei].sets[S.pad.si]; const v = s[S.pad.field]; S.pad.buf = v == null ? '' : (S.pad.field === 'w' ? fmtW(v) : String(v)); S.pad.fresh = true; } break;
+    case 'padlog': { const p = S.pad; commitPad(); logSet(p.ei, p.si); } return;
+    case 'type': { const s = S.workout.exercises[ei].sets[si]; s.type = s.type === 'work' ? 'warm' : s.type === 'warm' ? 'fail' : 'work'; if (s.logged) s.rec = s.type === 'warm' ? null : s.rec; } break;
+    case 'addset': { const ex = S.workout.exercises[ei]; const l = ex.sets[ex.sets.length - 1]; ex.sets.push({ w: l ? l.w : null, r: l ? l.r : null, type: 'work', logged: false, ghost: true, rec: null, note: '' }); } break;
+    case 'picker': S.picker = { q: '', tag: null, focus: false }; break;
+    case 'pickclose': S.picker = null; break;
+    case 'tag': S.picker.tag = S.picker.tag === b.dataset.t ? null : b.dataset.t; S.picker.focus = false; break;
+    case 'search': S.picker.focus = true; return;
+    case 'pick': S.workout.exercises.push(newExercise(b.dataset.n)); S.picker = null; break;
+    case 'trophy': S.trophy = ei; break;
+    case 'trophyclose': S.trophy = null; break;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('input', e => {
+  if (e.target.dataset.a === 'search') { S.picker.q = e.target.value; S.picker.focus = true; render(); }
+});
+
+render();
+</script>
+</body>
+</html>

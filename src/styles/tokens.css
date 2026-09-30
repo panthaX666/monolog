@@ -1,0 +1,31 @@
+/* Monolog design tokens — see docs/SPEC.md §5. Gold (--accent) means progress: records + streak only. */
+:root {
+  --bg: #000000;
+  --surface-1: #111113;
+  --surface-2: #1c1c1f;
+  --surface-3: #2a2a2e;
+  --border: #26262a;
+  --text-1: #ffffff;
+  --text-2: #a1a1a6;
+  --text-3: #6b6b70;
+  --accent: #f5c542;
+  --accent-dim: rgba(245, 197, 66, 0.14);
+  --danger: #ff453a;
+
+  --r-card: 20px;
+  --r-btn: 14px;
+  --r-pill: 999px;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+
+  --font: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --tabbar-h: 66px;
+}
