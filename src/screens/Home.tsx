@@ -64,6 +64,9 @@ export function Home() {
         <p className="t-meta" style={{ marginBottom: 0 }}>
           Logging arrives in M2. This screen confirms install, offline mode and updates.
         </p>
+        <p className="t-meta" style={{ marginBottom: 0, color: 'var(--accent)' }}>
+          ✓ Update test received. Updates reach your phone.
+        </p>
       </section>
 
       <section className="card">
