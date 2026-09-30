@@ -129,6 +129,7 @@ test('set types, notes and survive a reload mid-workout', async ({ page }) => {
   await bench.getByPlaceholder('Note for this set').press('Enter');
   await expect(bench.getByText('“felt easy”')).toBeVisible();
   await row.getByRole('button', { name: 'Log set' }).click();
+  await expect(row.getByRole('button', { name: 'Un-log set' })).toBeVisible(); // saved
 
   // Crash-safe: reload and everything is still there.
   await page.reload();
