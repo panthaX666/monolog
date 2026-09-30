@@ -9,7 +9,14 @@ body {
   color: var(--text-1);
   font-family: var(--font);
   font-feature-settings: 'tnum' 1, 'cv11' 1;
-  overscroll-behavior: none;
+}
+/* Block pull-to-refresh only in the installed app (no accidental reloads mid-workout).
+   In a normal Chrome tab it must stay available. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
 }
 button {
   font: inherit;
