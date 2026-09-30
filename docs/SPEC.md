@@ -170,7 +170,7 @@ Primary button (white/black, max one per screen) · Secondary (surface-2 + borde
 
 ---
 
-## 6. Data model (IndexedDB via Dexie, DB name `monolog-v1-<random>`)
+## 6. Data model (IndexedDB via Dexie, DB name `monolog.panthax666`)
 
 ```ts
 type ID = string;           // crypto.randomUUID()
@@ -219,11 +219,11 @@ interface Settings {
 Indexes: `sets: [exerciseId+loggedAt], sessionId, dayKey` · `sessions: dayKey, startedAt` · `bodyEntries: dayKey` · `recordEvents: exerciseId, at` · `exercises: &nameKey`.
 
 ### 6.1 Record rules (unit-tested)
-- Eligible: logged (`loggedAt != null`), `kind = 'working'`, **same exerciseId**. Order by `loggedAt`.
+- Eligible: logged (`loggedAt != null`), `kind = 'working'`, **same exerciseId**. Order by training day (`dayKey`), then `loggedAt` — so a set added later to an old workout is compared against its own past.
 - First-ever eligible set of an exercise → no record.
 - **Weight:** `weightKg > max(prior weightKg)` (tolerance 0.001).
 - **Reps:** `reps > max(prior reps where prior.weightKg ≥ this.weightKg)`.
-- Bodyweight: weight = added kg. Timed: `durationSec` (at ≥ added weight). Cardio: longest `distanceM`, longest `durationSec`, fastest pace = lowest `durationSec/distanceM` among sets with distance ≥ this distance.
+- Bodyweight: weight = added kg. Timed: `durationSec` (at ≥ added weight). Cardio: longest `distanceM`, longest `durationSec`, fastest pace = lowest `durationSec/distanceM` vs prior efforts with distance ≥ this distance (precedence per set: distance › pace › time).
 - If a set is both weight and reps record → show weight.
 - Editing/deleting/un-logging a set recomputes RecordEvents for that exercise from that set's `loggedAt` onward; celebrations fire only for live logging.
 

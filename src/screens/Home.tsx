@@ -1,4 +1,6 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
+import { getDb } from '../data/db';
 import { promptInstall, useInstallState } from '../lib/install';
 import { requestPersistence, type PersistState } from '../lib/storage';
 
@@ -35,6 +37,7 @@ function InstallCard() {
 export function Home() {
   const [persist, setPersist] = useState<PersistState | null>(null);
   const install = useInstallState();
+  const exerciseCount = useLiveQuery(() => getDb().exercises.count(), [], null);
 
   useEffect(() => {
     void requestPersistence().then(setPersist);
@@ -57,15 +60,12 @@ export function Home() {
       <InstallCard />
 
       <section className="card">
-        <div className="t-label">Milestone 0</div>
+        <div className="t-label">Milestone 1</div>
         <p className="t-h2" style={{ marginTop: 8 }}>
-          Skeleton is live.
+          Engine is in.
         </p>
         <p className="t-meta" style={{ marginBottom: 0 }}>
-          Logging arrives in M2. This screen confirms install, offline mode and updates.
-        </p>
-        <p className="t-meta" style={{ marginBottom: 0, color: 'var(--accent)' }}>
-          ✓ Update test received. Updates reach your phone.
+          Database, records, streaks and the exercise library run on your phone. Logging arrives in M2.
         </p>
       </section>
 
@@ -91,6 +91,10 @@ export function Home() {
         <div className="kv">
           <span>Data storage</span>
           <span>{persist ? PERSIST_TEXT[persist] : '…'}</span>
+        </div>
+        <div className="kv">
+          <span>Exercise library</span>
+          <span>{exerciseCount == null ? '…' : `${exerciseCount} exercises`}</span>
         </div>
       </section>
     </main>
