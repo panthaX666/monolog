@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { promptInstall, useInstallState } from '../lib/install';
 import { requestPersistence, type PersistState } from '../lib/storage';
 
 const PERSIST_TEXT: Record<PersistState, string> = {
@@ -7,13 +8,33 @@ const PERSIST_TEXT: Record<PersistState, string> = {
   unsupported: 'Not supported',
 };
 
-function isInstalled(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches;
+function InstallCard() {
+  const state = useInstallState();
+  if (state === 'installed') return null;
+  return (
+    <section className="card">
+      <div className="t-label">Install</div>
+      <p className="t-h2" style={{ marginTop: 8 }}>
+        Get Monolog as an app
+      </p>
+      <p className="t-meta">Opens full-screen from your home screen and works offline.</p>
+      {state === 'available' ? (
+        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => void promptInstall()}>
+          Install Monolog
+        </button>
+      ) : (
+        <p className="t-meta" style={{ marginBottom: 0 }}>
+          Getting ready… if no button appears, use Chrome ⋮ → <b>Install app</b> (not “Create shortcut”).
+        </p>
+      )}
+    </section>
+  );
 }
 
 // M0 placeholder: proves install, offline and update flow on the phone.
 export function Home() {
   const [persist, setPersist] = useState<PersistState | null>(null);
+  const install = useInstallState();
 
   useEffect(() => {
     void requestPersistence().then(setPersist);
@@ -32,6 +53,8 @@ export function Home() {
         </div>
         <span className="rec-sq" aria-hidden="true" />
       </header>
+
+      <InstallCard />
 
       <section className="card">
         <div className="t-label">Milestone 0</div>
@@ -60,7 +83,7 @@ export function Home() {
         </div>
         <div className="kv">
           <span>Installed</span>
-          <span>{isInstalled() ? 'Yes' : 'No — open in Chrome ⋮ → Install app'}</span>
+          <span>{install === 'installed' ? 'Yes' : 'No'}</span>
         </div>
         <div className="kv">
           <span>Data storage</span>
