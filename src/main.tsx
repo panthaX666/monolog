@@ -3,13 +3,16 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/inter';
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/app.css';
 import './lib/install';
 import { App } from './App';
 import { getDb } from './data/db';
 import { ensureReady } from './data/repo';
+import { requestPersistence } from './lib/storage';
 
-// Create the database and seed the exercise library on first run.
+// Create the database and seed the exercise library on first run; ask the browser not to evict data.
 void ensureReady(getDb());
+void requestPersistence();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

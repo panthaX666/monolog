@@ -6,3 +6,5 @@ dev-dist
 
 # Local planning notes (not part of the app)
 gym_app_redesign_prompt.md
+test-results
+playwright-report
