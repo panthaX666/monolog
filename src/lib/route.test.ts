@@ -31,3 +31,12 @@ describe('parseRoute', () => {
     expect(parseRoute('#/summary')).toEqual({ view: 'tab', tab: 'home' });
   });
 });
+
+describe('M3 routes', () => {
+  it('session, exercise, edit and new', () => {
+    expect(parseRoute('#/session/abc')).toEqual({ view: 'session', id: 'abc' });
+    expect(parseRoute('#/exercise/seed%3Abench-press')).toEqual({ view: 'exercise', id: 'seed:bench-press' });
+    expect(parseRoute('#/exercise/seed:squat/edit')).toEqual({ view: 'exerciseEdit', id: 'seed:squat' });
+    expect(parseRoute('#/exercise/new')).toEqual({ view: 'exerciseEdit', id: null });
+  });
+});

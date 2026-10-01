@@ -182,7 +182,7 @@ export function Home() {
         <section className="card">
           <div className="t-label">Coming next</div>
           <p className="t-meta" style={{ marginBottom: 0 }}>
-            History and exercise pages arrive in M3; weekly coverage, body weight and charts in M4.
+            Weekly muscle coverage, body weight, charts, and timed & cardio exercises arrive in M4.
           </p>
         </section>
       </main>

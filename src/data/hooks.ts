@@ -63,7 +63,10 @@ export function useWorkout(sessionId: string | undefined): WorkoutData | null | 
         const exercise = exById.get(se.exerciseId);
         if (!exercise) continue;
         const history = histById.get(se.exerciseId) ?? [];
-        const earlier = history.filter((s) => s.loggedAt != null && s.sessionId !== sessionId).sort(compareChrono);
+        // "Last" = the most recent other session on or before this one's day (matters when editing the past).
+        const earlier = history
+          .filter((s) => s.loggedAt != null && s.sessionId !== sessionId && s.dayKey <= session.dayKey)
+          .sort(compareChrono);
         const lastSessionId = earlier[earlier.length - 1]?.sessionId;
         cards.push({
           se,

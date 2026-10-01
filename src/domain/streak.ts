@@ -100,6 +100,59 @@ export function computeStreak({ trainedDays, restDays, today }: StreakInput): St
   return result;
 }
 
+export interface StreakSegment {
+  start: DayKey;
+  end: DayKey;
+  length: number;
+}
+
+/**
+ * Every streak run in history, oldest first, under the same rules as computeStreak: an empty day
+ * (outside the grace window) ends a run, and rest days past the 3rd don't belong to any run.
+ * Used to draw the joined streak bars on the History calendar.
+ */
+export function streakSegments({ trainedDays, restDays, today }: StreakInput): StreakSegment[] {
+  const trained = new Set(trainedDays);
+  const rest = new Set(restDays);
+  const yesterday = addDays(today, -1);
+  const known = [...trained, ...rest].filter((d) => d <= today).sort();
+  if (!known.length) return [];
+
+  const segments: StreakSegment[] = [];
+  let cur: StreakSegment | null = null;
+  let restRun = 0;
+  const close = () => {
+    if (cur) segments.push(cur);
+    cur = null;
+    restRun = 0;
+  };
+
+  for (let day = known[0]!; day <= today; day = addDays(day, 1)) {
+    const status = dayStatus(day, trained, rest);
+    if (status === 'empty') {
+      if (day === today || day === yesterday) continue; // still fillable — not a break yet
+      close();
+      continue;
+    }
+    if (status === 'rest') {
+      restRun += 1;
+      if (restRun > MAX_REST_RUN) {
+        // The 4th rest day breaks the run; extra rest days don't start a new one.
+        if (cur) segments.push(cur);
+        cur = null;
+        continue;
+      }
+    } else {
+      restRun = 0;
+    }
+    if (!cur) cur = { start: day, end: day, length: 0 };
+    cur.end = day;
+    cur.length += 1;
+  }
+  close();
+  return segments;
+}
+
 /** Can a rest day be logged for `day`? Only today, or yesterday until the end of today (D22). */
 export function canLogRestDay(day: DayKey, today: DayKey, trained: Set<DayKey>): boolean {
   if (trained.has(day)) return false;

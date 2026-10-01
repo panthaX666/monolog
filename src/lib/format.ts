@@ -23,16 +23,20 @@ function dateOf(day: DayKey): Date {
   return new Date(y, m - 1, d);
 }
 
-/** "28 Sep" (adds the year when it isn't this year). */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** "28 Sep" (adds the year when it isn't this year). Fixed English abbreviations, never "Sept". */
 export function formatDay(day: DayKey, today?: DayKey): string {
   const d = dateOf(day);
   const sameYear = !today || today.slice(0, 4) === day.slice(0, 4);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(sameYear ? {} : { year: 'numeric' }) });
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${sameYear ? '' : ` ${d.getFullYear()}`}`;
 }
 
 /** "Wed 30 Sep" */
 export function formatWeekday(day: DayKey): string {
-  return dateOf(day).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const d = dateOf(day);
+  return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
 }
 
 /** "10:42" in the phone's locale. */

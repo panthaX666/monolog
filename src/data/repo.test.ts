@@ -17,11 +17,13 @@ import {
   logSet,
   recentRecords,
   removeExerciseFromSession,
+  repeatSession,
   RepoError,
   restoreSet,
   saveBodyEntry,
   setArchived,
   startSession,
+  tidySession,
   unlogSet,
   updateExercise,
   updateSet,
@@ -290,5 +292,47 @@ describe('body entries', () => {
     expect(all).toHaveLength(1);
     expect(all[0]).toMatchObject({ weightKg: 82.4, bodyFatPct: 18.2 });
     await expect(saveBodyEntry(db, '2026-09-30', { bodyFatPct: 120 })).rejects.toMatchObject({ code: 'invalid' });
+  });
+});
+
+describe('editing the past & repeat', () => {
+  it('adding an exercise to an old workout pre-fills from the session before it, not a later one', async () => {
+    const old = await workout('2026-09-20', { [PUSH]: [[40, 10]] });
+    await workout('2026-09-10', { [RAISE]: [[10, 12]] });
+    await workout('2026-09-28', { [RAISE]: [[15, 8]] });
+    const { sets } = await addExerciseToSession(db, old.id, RAISE);
+    expect(sets.map((s) => [s.weight, s.reps])).toEqual([[10, 12]]);
+  });
+
+  it('tidySession drops un-logged sets and empty cards, and deletes a workout left empty', async () => {
+    const s = await workout('2026-09-20', { [PUSH]: [[40, 10]] });
+    const { sessionExercise } = await addExerciseToSession(db, s.id, RAISE); // ghost only
+    expect(await tidySession(db, s.id)).toEqual({ kept: true });
+    expect(await db.sessionExercises.get(sessionExercise.id)).toBeUndefined();
+    expect(await db.sets.where('sessionId').equals(s.id).count()).toBe(1);
+
+    const only = (await db.sets.where('sessionId').equals(s.id).first())!;
+    await deleteSet(db, only.id);
+    expect(await tidySession(db, s.id)).toEqual({ kept: false });
+    expect(await db.sessions.get(s.id)).toBeUndefined();
+  });
+
+  it('tidySession never touches the live workout', async () => {
+    const s = await startSession(db, at('2026-09-30'));
+    await addExerciseToSession(db, s.id, PUSH);
+    expect(await tidySession(db, s.id)).toEqual({ kept: true });
+    expect(await db.sets.where('sessionId').equals(s.id).count()).toBe(1);
+  });
+
+  it('repeat copies exercises in order with that session’s sets as pre-fill', async () => {
+    const from = await workout('2026-09-20', { [RAISE]: [[10, 12], [10, 10]], [PUSH]: [[40, 10]] });
+    await workout('2026-09-25', { [PUSH]: [[50, 5]] }); // later numbers must NOT be used
+    const s = await repeatSession(db, from.id, at('2026-09-30', 9));
+    expect(s.repeatedFrom).toBe(from.id);
+    const ses = await db.sessionExercises.where('sessionId').equals(s.id).sortBy('order');
+    expect(ses.map((x) => x.exerciseId)).toEqual([RAISE, PUSH]);
+    const pushSets = await db.sets.where('sessionExerciseId').equals(ses[1]!.id).toArray();
+    expect(pushSets.map((x) => [x.weight, x.reps, x.loggedAt])).toEqual([[40, 10, null]]);
+    await expect(repeatSession(db, from.id)).rejects.toMatchObject({ code: 'session_open' });
   });
 });

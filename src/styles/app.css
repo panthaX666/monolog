@@ -394,3 +394,58 @@
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
 .stats .big { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .settings .kv span:last-child { max-width: 60%; }
+
+/* ===== M3: history, exercise pages ===== */
+.hdr-title { display: flex; flex-direction: column; align-items: center; font-size: 15px; line-height: 1.25; text-align: center; }
+.icon-btn:disabled { opacity: 0.3; }
+.calendar { margin-top: var(--s3); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; margin-top: var(--s3); }
+.cal-head { text-align: center; font-size: 12px; font-weight: 600; color: var(--text-3); padding-bottom: 4px; }
+.cal-day { height: 44px; display: grid; place-items: center; position: relative; }
+.cal-day:disabled { opacity: 0.35; }
+/* Streak runs of 3+ days are joined into one gold-tinted bar behind the day dots. */
+.cal-day.run::before { content: ''; position: absolute; left: 0; right: 0; top: 5px; bottom: 5px; background: var(--accent-dim); }
+.cal-day.run-l::before { left: 4px; border-top-left-radius: 17px; border-bottom-left-radius: 17px; }
+.cal-day.run-r::before { right: 4px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; }
+.cal-dot {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.cal-dot.trained { background: var(--text-1); color: #000; }
+.cal-dot.rest { border: 2px solid var(--text-1); color: var(--text-1); }
+.cal-dot.today:not(.trained):not(.rest) { border: 2px dashed var(--text-3); }
+.cal-dot.small { width: 16px; height: 16px; }
+.cal-day.sel .cal-dot { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cal-legend { margin-top: var(--s3); }
+.history-card { display: block; width: 100%; text-align: left; margin-top: var(--s3); font-size: 15px; }
+.history-card:active { background: var(--surface-2); }
+.rest-row { color: var(--text-2); }
+.seg-wide { display: flex; width: 100%; }
+.seg-wide button { flex: 1; height: 40px; }
+.chip-group { margin-top: 10px; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip-wrap .chip { height: 36px; font-weight: 500; }
+.chip:disabled { opacity: 0.3; }
+.exercise-edit .row input,
+.exercise-edit .field input {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  color: var(--text-1);
+  padding: 0 14px;
+  font: inherit;
+  outline: none;
+  min-width: 0;
+}
+.exercise-edit .menu-item small { font-weight: 400; }
+.menu-item:disabled { opacity: 0.35; }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from './dates';
-import { canLogRestDay, computeStreak } from './streak';
+import { canLogRestDay, computeStreak, streakSegments } from './streak';
 
 const TODAY = '2026-09-30';
 
@@ -68,6 +68,46 @@ describe('streak', () => {
 
   it('matches the Home mockup: 9-day streak with one rest day', () => {
     expect(streakOf('.TT.TTTRTTTTT')).toMatchObject({ current: 9, best: 9 });
+  });
+});
+
+describe('streakSegments', () => {
+  const segs = (pattern: string, today = TODAY) =>
+    streakSegments({ ...history(pattern, today), today }).map((s) => [s.start.slice(5), s.end.slice(5), s.length]);
+
+  it('splits runs on empty days', () => {
+    // 22..30 Sep: T T . T T T . . .   (today = 30th, 29th pending)
+    expect(segs('TT.TTT...')).toEqual([
+      ['09-22', '09-23', 2],
+      ['09-25', '09-27', 3],
+    ]);
+  });
+
+  it('a 4th rest day ends the run and extra rest days belong to none', () => {
+    expect(segs('TTRRRRRT')).toEqual([
+      ['09-23', '09-27', 5],
+      ['09-30', '09-30', 1],
+    ]);
+  });
+
+  it("today and yesterday being empty don't split a run", () => {
+    expect(segs('TTT..')).toEqual([['09-26', '09-28', 3]]);
+    expect(segs('TTT.T')).toEqual([['09-26', '09-30', 4]]);
+  });
+
+  it('agrees with computeStreak on random histories', () => {
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31);
+    for (let n = 0; n < 300; n++) {
+      const pattern = Array.from({ length: 30 }, () => 'TTR.'[Math.floor(rnd() * 4)]).join('');
+      const input = { ...history(pattern, TODAY), today: TODAY };
+      const streak = computeStreak(input);
+      const all = streakSegments(input);
+      const last = all[all.length - 1];
+      const live = last && last.end >= addDays(TODAY, -2) && streak.current > 0 ? last.length : 0;
+      expect(live, pattern).toBe(streak.current);
+      expect(Math.max(0, ...all.map((s) => s.length)), pattern).toBe(streak.best);
+    }
   });
 });
 

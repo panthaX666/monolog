@@ -217,6 +217,59 @@ export async function discardSession(db: MonologDB, sessionId: ID): Promise<{ de
   });
 }
 
+/**
+ * After editing a past workout: drop un-logged sets and empty exercise cards. A workout left with
+ * nothing logged is deleted. Returns whether the session still exists.
+ */
+export async function tidySession(db: MonologDB, sessionId: ID): Promise<{ kept: boolean }> {
+  return db.transaction('rw', [db.sessions, db.sessionExercises, db.sets], async () => {
+    const session = await db.sessions.get(sessionId);
+    if (!session) return { kept: false };
+    if (session.endedAt === null) return { kept: true }; // never tidy the live workout
+    const sets = await db.sets.where('sessionId').equals(sessionId).toArray();
+    await db.sets.bulkDelete(sets.filter((s) => s.loggedAt == null).map((s) => s.id));
+    const loggedSe = new Set(sets.filter((s) => s.loggedAt != null).map((s) => s.sessionExerciseId));
+    const ses = await db.sessionExercises.where('sessionId').equals(sessionId).sortBy('order');
+    await db.sessionExercises.bulkDelete(ses.filter((se) => !loggedSe.has(se.id)).map((se) => se.id));
+    const kept = ses.filter((se) => loggedSe.has(se.id));
+    await Promise.all(kept.map((se, i) => (se.order === i ? null : db.sessionExercises.update(se.id, { order: i }))));
+    if (!kept.length) {
+      await db.sessions.delete(sessionId);
+      return { kept: false };
+    }
+    return { kept: true };
+  });
+}
+
+/**
+ * Repeat: start a new workout with the same exercises, in the same order, pre-filled with that
+ * session's sets (SPEC F7).
+ */
+export async function repeatSession(db: MonologDB, fromSessionId: ID, now: Date = new Date()): Promise<Session> {
+  return db.transaction(
+    'rw',
+    [db.sessions, db.sessionExercises, db.sets, db.exercises, db.settings],
+    async () => {
+      await must(db.sessions.get(fromSessionId), 'Session');
+      const session = await startSession(db, now, fromSessionId);
+      const ses = await db.sessionExercises.where('sessionId').equals(fromSessionId).sortBy('order');
+      const unit = (await getSettings(db)).unit;
+      for (const [i, from] of ses.entries()) {
+        const ex = await db.exercises.get(from.exerciseId);
+        if (!ex) continue;
+        const se: SessionExercise = { id: uuid(), sessionId: session.id, exerciseId: ex.id, order: i };
+        await db.sessionExercises.add(se);
+        const src = (await db.sets.where('sessionExerciseId').equals(from.id).sortBy('order')).filter((s) => s.loggedAt);
+        const sets = src.length
+          ? src.map((p, j) => ghostFrom(p, blankSet(se, session.dayKey, j, ex.unit ?? unit)))
+          : [blankSet(se, session.dayKey, 0, ex.unit ?? unit)];
+        await db.sets.bulkAdd(sets);
+      }
+      return session;
+    },
+  );
+}
+
 // ───────────────────────── Exercises within a session ─────────────────────────
 
 function blankSet(se: SessionExercise, dayKey: DayKey, order: number, unit: Unit): WorkoutSet {
@@ -254,12 +307,20 @@ function ghostFrom(src: WorkoutSet, base: WorkoutSet): WorkoutSet {
   };
 }
 
-/** Logged sets from the most recent earlier session containing this exercise. */
-export async function lastSessionSets(db: MonologDB, exerciseId: ID, beforeSessionId?: ID): Promise<WorkoutSet[]> {
+/**
+ * Logged sets from the most recent other session containing this exercise, on or before `onOrBefore`
+ * (so editing an old workout pre-fills from the session before it, not from later ones).
+ */
+export async function lastSessionSets(
+  db: MonologDB,
+  exerciseId: ID,
+  excludeSessionId?: ID,
+  onOrBefore?: DayKey,
+): Promise<WorkoutSet[]> {
   const logged = await db.sets
     .where('exerciseId')
     .equals(exerciseId)
-    .filter((s) => s.loggedAt != null && s.sessionId !== beforeSessionId)
+    .filter((s) => s.loggedAt != null && s.sessionId !== excludeSessionId && (!onOrBefore || s.dayKey <= onOrBefore))
     .toArray();
   if (!logged.length) return [];
   const latest = logged.reduce((a, b) => (b.dayKey > a.dayKey || (b.dayKey === a.dayKey && b.loggedAt! > a.loggedAt!) ? b : a));
@@ -280,7 +341,7 @@ export async function addExerciseToSession(
     await db.sessionExercises.add(se);
 
     const unit = ex.unit ?? (await getSettings(db)).unit;
-    const previous = await lastSessionSets(db, exerciseId, sessionId);
+    const previous = await lastSessionSets(db, exerciseId, sessionId, session.dayKey);
     const sets = previous.length
       ? previous.map((p, i) => ghostFrom(p, blankSet(se, session.dayKey, i, unit)))
       : [blankSet(se, session.dayKey, 0, unit)];

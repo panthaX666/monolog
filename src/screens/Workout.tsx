@@ -14,6 +14,8 @@ import {
   deleteSet,
   discardSession,
   finishSession,
+  repeatSession,
+  tidySession,
   logSet,
   removeExerciseFromSession,
   RepoError,
@@ -27,7 +29,7 @@ import type { RecordEvent, Unit, WorkoutSet } from '../domain/types';
 import { displayWeight, formatWeight } from '../domain/units';
 import { useNow } from '../lib/clock';
 import { buzz, HAPTIC, useWakeLock } from '../lib/device';
-import { formatClock, formatDay, formatDuration, formatTime, plural } from '../lib/format';
+import { formatClock, formatDay, formatDuration, formatTime, formatWeekday, plural } from '../lib/format';
 import { navigate } from '../lib/route';
 import { setRestDuration, startRest, stopRest } from '../lib/restTimer';
 
@@ -40,6 +42,7 @@ type Overlay =
   | { kind: 'setMenu'; setId: string }
   | { kind: 'finish' }
   | { kind: 'discard' }
+  | { kind: 'repeatBlocked' }
   | { kind: 'remove'; seId: string }
   | null;
 
@@ -78,9 +81,14 @@ function celebrationFor(ev: RecordEvent, card: CardData, set: WorkoutSet, unit: 
   };
 }
 
-export function Workout() {
+/**
+ * The workout screen. Without `editId` it shows the live workout; with `editId` it edits a past
+ * workout (SPEC N9): same cards and controls, but no clock, rest timer or celebrations.
+ */
+export function Workout({ editId }: { editId?: string } = {}) {
   const open = useOpenSession();
-  const data = useWorkout(open?.id);
+  const live = !editId;
+  const data = useWorkout(live ? open?.id : editId);
   const settings = useSettings();
   const db = getDb();
   const enqueue = useWriteQueue();
@@ -94,12 +102,25 @@ export function Workout() {
   const [snack, setSnack] = useState<{ text: string; undo?: WorkoutSet } | null>(null);
   const [staleDismissed, setStaleDismissed] = useState(false);
 
-  useWakeLock(settings.wakeLock && !!open);
+  useWakeLock(live && settings.wakeLock && !!open);
 
-  // No open workout → back to Home (e.g. finished on another tab).
+  // Live: no open workout → back to Home (e.g. finished elsewhere).
   useEffect(() => {
-    if (open === null) navigate('#/', true);
-  }, [open]);
+    if (live && open === null) navigate('#/', true);
+  }, [live, open]);
+
+  // Editing: a missing workout → History; the live workout opened from History → live screen.
+  useEffect(() => {
+    if (live) return;
+    if (data === null) navigate('#/history', true);
+    else if (data && data.session.endedAt === null) navigate('#/workout', true);
+  }, [live, data]);
+
+  // Leaving an edited past workout tidies it (drops un-logged sets / empty cards).
+  useEffect(() => {
+    if (!editId) return;
+    return () => void tidySession(getDb(), editId);
+  }, [editId]);
 
   useEffect(() => {
     if (!snack) return;
@@ -120,7 +141,7 @@ export function Workout() {
   };
   const touch = (id: string) => setTouched((t) => (t.has(id) ? t : new Set(t).add(id)));
 
-  if (!open || !data) return <main className="screen" />;
+  if (!data || (live && !open)) return <main className="screen" />;
 
   const session = data.session;
   const elapsed = (now - Date.parse(session.startedAt)) / 1000;
@@ -144,6 +165,7 @@ export function Workout() {
     try {
       const res = await enqueue(() => logSet(db, set.id));
       setPad(null);
+      if (!live) return buzz(HAPTIC.log); // editing the past: records update silently
       buzz(res.record ? HAPTIC.record : HAPTIC.log);
       setRestDuration(restFor(card));
       if (settings.restAutoStart) startRest(restFor(card));
@@ -173,10 +195,17 @@ export function Workout() {
 
   const discard = async () => {
     await enqueue(() => discardSession(db, session.id));
-    stopRest();
     setOverlay(null);
     setPad(null);
-    navigate('#/', true);
+    if (live) stopRest();
+    navigate(live ? '#/' : '#/history', true);
+  };
+
+  const repeat = async () => {
+    if (open) return setOverlay({ kind: 'repeatBlocked' });
+    await enqueue(() => tidySession(db, session.id));
+    await enqueue(() => repeatSession(db, session.id));
+    navigate('#/workout');
   };
 
   const finish = async (endAt?: Date) => {
@@ -187,18 +216,38 @@ export function Workout() {
 
   return (
     <div className="workout">
-      <header className="hdr">
-        <button className="chip" onClick={() => navigate('#/')} aria-label="Back to Home">
-          ‹ Home
-        </button>
-        <span className="t-meta mono" aria-label="Workout time">
-          ● {formatClock(elapsed)}
-        </span>
-        <RestChip />
-      </header>
+      {live ? (
+        <header className="hdr">
+          <button className="chip" onClick={() => navigate('#/')} aria-label="Back to Home">
+            ‹ Home
+          </button>
+          <span className="t-meta mono" aria-label="Workout time">
+            ● {formatClock(elapsed)}
+          </span>
+          <RestChip />
+        </header>
+      ) : (
+        <header className="hdr">
+          <button className="chip" onClick={() => navigate('#/history')} aria-label="Back to History">
+            ‹ History
+          </button>
+          <span className="hdr-title">
+            <b>{formatWeekday(session.dayKey)}</b>
+            {session.endedAt && (
+              <span className="t-meta">
+                {formatTime(session.startedAt)} ·{' '}
+                {formatDuration((Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000)}
+              </span>
+            )}
+          </span>
+          <button className="chip" onClick={() => void repeat()} aria-label="Repeat this workout">
+            ↻ Repeat
+          </button>
+        </header>
+      )}
 
       <main className="screen workout-scroll">
-        {stale && (
+        {live && stale && (
           <div className="card banner">
             <p style={{ margin: 0 }}>This workout started {formatDuration(elapsed)} ago.</p>
             <div className="row" style={{ marginTop: 10 }}>
@@ -246,15 +295,19 @@ export function Workout() {
               <p className="t-meta">Add your first exercise below.</p>
             </div>
           </div>
-        ) : (
+        ) : live ? (
           <button className="btn btn-secondary finish" onClick={() => setOverlay({ kind: 'finish' })}>
             Finish workout
+          </button>
+        ) : (
+          <button className="btn btn-secondary finish" onClick={() => navigate('#/history')}>
+            Done
           </button>
         )}
 
         {/* Always available, kept low and full-width — far from the ✓ column. */}
         <button className="btn btn-danger discard" onClick={() => setOverlay({ kind: 'discard' })}>
-          Discard workout
+          {live ? 'Discard workout' : 'Delete workout'}
         </button>
       </main>
 
@@ -404,9 +457,9 @@ export function Workout() {
       )}
 
       {overlay?.kind === 'discard' && (
-        <Dialog onClose={() => setOverlay(null)} label="Discard workout">
+        <Dialog onClose={() => setOverlay(null)} label={live ? 'Discard workout' : 'Delete workout'}>
           <div className="t-h2">
-            Discard workout?
+            {live ? 'Discard workout?' : 'Delete this workout?'}
             {loggedAll.length > 0 && ` ${plural(loggedAll.length, 'logged set')} will be deleted.`}
           </div>
           <p className="t-meta">
@@ -419,7 +472,22 @@ export function Workout() {
               Cancel
             </button>
             <button className="btn btn-danger" onClick={() => void discard()}>
-              Discard
+              {live ? 'Discard' : 'Delete'}
+            </button>
+          </div>
+        </Dialog>
+      )}
+
+      {overlay?.kind === 'repeatBlocked' && (
+        <Dialog onClose={() => setOverlay(null)} label="Workout in progress">
+          <div className="t-h2">A workout is already in progress</div>
+          <p className="t-meta">Finish or discard it before repeating this one.</p>
+          <div className="dialog-actions">
+            <button className="btn btn-secondary" onClick={() => setOverlay(null)}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={() => navigate('#/workout')}>
+              Resume it
             </button>
           </div>
         </Dialog>
