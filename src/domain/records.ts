@@ -1,7 +1,7 @@
 import type { ExerciseType, RecordEvent, RecordKind, WorkoutSet } from './types';
 import { EPS } from './units';
 
-// Record rules — docs/SPEC.md §6.1.
+// Record rules, docs/SPEC.md §6.1.
 // Pure functions: given one exercise's sets, derive every RecordEvent deterministically. Because the
 // result depends only on the stored sets, editing or deleting history just means recomputing.
 
@@ -95,8 +95,8 @@ export function detectRecord(type: ExerciseType, prior: WorkoutSet[], set: Worko
 }
 
 /**
- * All record events for one exercise. Sets of other exercises are ignored even if passed in —
- * the old app compared across exercises and showed false records; this can't.
+ * All record events for one exercise. Sets of other exercises are ignored even if passed in.
+ * The old app compared across exercises and showed false records; this can't.
  */
 export function computeRecords(exerciseId: string, type: ExerciseType, sets: WorkoutSet[]): RecordEvent[] {
   const ordered = sets.filter((s) => s.exerciseId === exerciseId && isEligible(s)).sort(compareChrono);

@@ -45,7 +45,7 @@ test('history lists the workout; editing it recomputes records silently and tidi
   await expect(item).toHaveCount(1);
   await expect(item).toContainText('Rope Tricep Pushdown · Bench Press · 3 sets');
 
-  // Open it: edit mode (History back, Repeat, Done, Delete) — no workout clock or rest timer.
+  // Open it: edit mode (History back, Repeat, Done, Delete), no workout clock or rest timer.
   await item.click();
   await expect(page.getByRole('button', { name: 'Back to History' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Repeat this workout' })).toBeVisible();

@@ -1,106 +1,114 @@
 # Changelog
 
-Every update that reaches the app is listed here. Versions are `0.<milestone>.<update>`: the middle
-number goes up with each milestone, the last number with each update in between. Each version
-becomes a GitHub Release automatically when it is published.
+Everything that changed in the app, newest first. Each version also shows up on the
+[Releases](https://github.com/panthaX666/monolog/releases) page.
 
-## [0.4.2] — 2026-10-01 · Release notes
+Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
+features lands, the last one for smaller updates in between.
 
-### Added
-- Settings → About shows the app version (for example `v0.4.2`) next to the build code.
-- Every published update now creates a GitHub Release with these notes; past versions were back-filled.
-
-## [0.4.1] — 2026-10-01 · Workout screen layout
+## [0.4.3] · 2026-10-01 · Cleaner wording
 
 ### Changed
-- **Add exercise** moved up, directly under the exercise cards, and stays the white main button.
-- **Finish workout** is now the fixed button at the bottom of the screen (dark style), so it can't be confused with Add exercise.
-- **Discard workout** sits at the bottom of the screen just above Finish, with clear space around it. In a long workout it follows the end of the list.
-- When editing a past workout, **Done** is the bottom button and **Delete workout** sits just above it.
-- Exercise names are larger (22px) and set numbers smaller and lighter (18px), so each card reads as a titled card rather than a grid of numbers. Tap areas are unchanged.
-- README tagline shortened to "A monochrome, offline-first gym tracker."
+- Rewrote the README, this changelog and the docs so they read more naturally. Install steps are shorter.
+- Removed em dashes from text in the app (streak warnings, exercise cards, settings and a few other spots).
 
-## [0.4.0] — 2026-10-01 · M4: Body, charts, timed & cardio
+## [0.4.2] · 2026-10-01 · Release notes
 
 ### Added
-- **Timed exercises** (e.g. Plank): log added weight and time. Time is typed microwave-style (`130` → 1:30); −/+ steps 15 s.
-- **Cardio** (e.g. Treadmill Run): log distance in km and time; pace is worked out.
-- Records and the celebration card for **time, distance and pace**.
-- **Body tab**: latest weight with change this week and over 30 days; weigh-in chart with a 7-day average; body fat, muscle mass and waist with their own pages and charts; calculated BMI, fat mass and lean mass.
-- **Check-in** sheet, pre-filled with your last values. Entries can be removed from each metric's page.
-- **Home cards**: weekly muscle coverage (tap for working sets per muscle group and when each was last trained), body weight with a trend line, recent records, and a weekly check-in reminder.
-- **Exercise page → Chart**: est. 1RM, top weight or volume per workout (or reps, hold, distance, pace, time), over 3M / 6M / 1Y / All; workouts with a record shown in gold.
-- Every chart shows the latest value above it, tap for any other point, and has a **Show as table** view.
-- Settings: height, weekly check-in day, which body metrics to track.
+- Settings → About now shows the version number (like `v0.4.2`) next to the build code.
+- Every update now gets its own page on GitHub Releases with these notes. Older versions were added too.
+
+## [0.4.1] · 2026-10-01 · Workout screen layout
 
 ### Changed
-- Timed and cardio exercises can now be added to workouts (they were greyed out).
-- Summaries, history and records show each exercise in its own format (e.g. `45.0×10`, `1:15`, `5.00 km · 30:00`).
+- Add exercise now sits right under your exercise cards and is still the big white button.
+- Finish workout is now the dark button pinned to the bottom, so you don't hit it by mistake.
+- Discard workout sits just above Finish with some space around it. In a long workout it's at the end of the list.
+- Same thing when editing an old workout: Done at the bottom, Delete workout just above it.
+- Exercise names are bigger (22px) and the set numbers are smaller and lighter (18px), so each card looks like a titled card instead of a wall of numbers. Buttons are still the same size to tap.
+- Shorter README tagline: "A monochrome, offline-first gym tracker."
 
-## [0.3.0] — 2026-10-01 · M3: History & Exercises
+## [0.4.0] · 2026-10-01 · Body tab, charts, timed and cardio
 
 ### Added
-- **History tab**: month calendar (weeks start Monday) with trained and rest days; streaks of 3+ days joined into gold bars. Tap a day to filter. Workouts and rest days listed below.
-- **Past workout page**: edit, add, delete or un-log sets in any old workout. Records update silently (no celebration). **Done** and **Delete workout** at the bottom.
-- **Repeat**: start a new workout with the same exercises, in order, pre-filled from that workout.
-- **Exercises tab**: search, muscle and equipment filters, archived list, create new.
-- **Exercise page**: records (max weight, max reps, est. 1RM, record timeline), history, all set notes, pinned note, unit and rest time per exercise.
-- **Exercise editor**: name, type, primary and secondary muscles, equipment, tags (compound / isolation / full body / custom), archive.
+- Timed exercises like Plank. You log added weight and time. Time is typed like a microwave (`130` means 1:30), and the −/+ buttons move 15 seconds.
+- Cardio like Treadmill Run. You log distance in km and time, and the app works out your pace.
+- Records and the celebration card now cover time, distance and pace too.
+- Body tab: your latest weight with the change this week and over 30 days, a weigh-in chart with a 7-day average, and body fat, muscle mass and waist with their own pages and charts. BMI, fat mass and lean mass get worked out for you.
+- Check-in sheet that starts with your last values filled in. You can delete entries from each metric's page.
+- New cards on Home: muscle coverage this week (tap it to see sets per muscle and when you last trained each), body weight with a trend line, your recent records, and a weekly check-in reminder.
+- Chart tab on every exercise: est. 1RM, top weight or volume per workout (or reps, hold time, distance, pace, time) over 3M / 6M / 1Y / All. Workouts where you hit a record show in gold.
+- Every chart shows the latest value above it. Tap anywhere on it to see other points, or switch to a table.
+- New settings: height, which day the weekly check-in is, and which body metrics you track.
 
 ### Changed
-- When editing an old workout, new exercises pre-fill from the session before that date, not from later ones.
-- Dates always read like "30 Sep" (some phones showed "30 Sept").
+- You can now add timed and cardio exercises to a workout (they used to be greyed out).
+- Summaries, history and records show each exercise in its own format, like `45.0×10`, `1:15` or `5.00 km · 30:00`.
+
+## [0.3.0] · 2026-10-01 · History and exercises
+
+### Added
+- History tab: a month calendar (weeks start on Monday) showing workout and rest days. Streaks of 3+ days get joined into gold bars. Tap a day to see just that day. Workouts and rest days are listed below.
+- Old workouts can be opened and edited: change, add, delete or un-log sets. Records update quietly in the background, no celebration. Done and Delete workout are at the bottom.
+- Repeat: start a new workout with the same exercises in the same order, filled in from that workout.
+- Exercises tab with search, muscle and equipment filters, an archived list, and a button to make your own.
+- Exercise page: records (max weight, max reps, est. 1RM, and a timeline of every record), history, all your set notes, a pinned note, and the unit and rest time for that exercise.
+- Exercise editor: name, type, main and secondary muscles, equipment, tags (compound, isolation, full body or your own), and archive.
+
+### Changed
+- When you edit an old workout and add an exercise, it fills in from the workout before that date, not from newer ones.
+- Dates always look like "30 Sep" now (some phones showed "30 Sept").
 
 ### Fixed
-- The tab bar now shows on exercise pages.
+- The tab bar now shows up on exercise pages.
 
-## [0.2.2] — 2026-10-01 · Discard workout
+## [0.2.2] · 2026-10-01 · Discard workout
 
 ### Added
-- **Discard workout** button (red), always available, with a confirmation that says how many logged sets will be deleted. Stops the rest timer and returns to Home.
+- A red Discard workout button that's always there. It asks first and tells you how many logged sets you'd lose. It also stops the rest timer and takes you back Home.
 
 ### Changed
-- Going Home during a workout never discards it — the workout and its clock keep running until you finish or discard.
+- Going back Home in the middle of a workout never throws it away. The workout and its clock keep going until you finish or discard it.
 
-## [0.2.1] — 2026-10-01 · Fit every screen
-
-### Fixed
-- On some Android phones the app was taller than the screen, pushing **Add exercise** under the navigation bar. Every screen now fits the visible window exactly; only the content area scrolls.
-
-## [0.2.0] — 2026-10-01 · M2: Workout logging
-
-### Added
-- **Home**: streak card (trained/rest dots, gold bar at 3+ days, rest days in a row out of 3, warning when yesterday still needs logging), Start/Resume workout, rest-day sheet for today or yesterday, backup reminder.
-- **Workout screen**: exercise cards pre-filled (faded) from last session, ✓ to log and tap again to un-log, unlimited sets, ✕ delete with Undo, warm-up / working / to-failure sets, per-set notes, last session's numbers and note, pinned note, kg/lb per exercise, screen kept on.
-- **Number pad**: direct typing (first key replaces), −/+ 2.5 kg, Next, Log set.
-- **Exercise picker**: search, muscle and equipment filters, Recent, A–Z, create exercise.
-- **Rest timer** in the top corner — manual start, optional auto-start.
-- **Records**: gold ✓ and gold records button on a record set, records popup, full "New record" celebration.
-- **Finish** dialog and workout **summary**.
-- **Settings**: units, rest default, auto-start, vibration, keep screen on, **save and restore backups**, version.
-
-## [0.1.0] — 2026-10-01 · M1: Engine
-
-### Added
-- On-phone database and a 93-exercise starter library, tagged by muscle, equipment and type.
-- Record detection (heavier weight, or more reps at the same or heavier weight; warm-ups never count; never compared across exercises), streak rules, weekly muscle coverage, backups.
-
-## [0.0.3] — 2026-10-01 · Update check
-
-### Added
-- A visible marker on Home to confirm updates reach the installed app.
-
-## [0.0.2] — 2026-10-01 · Install button
-
-### Added
-- **Install Monolog** button on Home, so the app installs as a real full-screen app instead of a Chrome shortcut.
-
-## [0.0.1] — 2026-10-01 · Pull to refresh
+## [0.2.1] · 2026-10-01 · Fits every screen
 
 ### Fixed
-- Pull-to-refresh works again in a normal Chrome tab (it's only blocked inside the installed app).
+- On some Android phones the app was taller than the screen, so Add exercise ended up hidden under the navigation bar. Every screen now fits properly and only the middle part scrolls.
 
-## [0.0.0] — 2026-10-01 · M0: First version
+## [0.2.0] · 2026-10-01 · Workout logging
 
 ### Added
-- Installable, offline app on GitHub Pages with four tabs, the black-and-white design, an "Update ready" banner, and a test-then-publish pipeline.
+- Home: streak card (dots for workout and rest days, a gold bar at 3+ days, how many rest days in a row out of 3, and a heads-up when yesterday still needs logging), Start or Resume workout, a rest day button for today or yesterday, and a backup reminder.
+- Workout screen: exercise cards filled in (faded) from last time, ✓ to log a set and tap again to undo it, as many sets as you want, ✕ to delete with Undo, warm-up / working / to-failure sets, notes on any set, last time's numbers and note, a pinned note, kg or lb per exercise, and the screen stays on.
+- Number pad: just type (the first key replaces the old number), −/+ by 2.5 kg, Next, and Log set.
+- Exercise picker: search, muscle and equipment filters, Recent, A–Z, and making a new exercise.
+- Rest timer in the top corner. You start it yourself, or turn on auto-start.
+- Records: gold ✓ and a gold records button when you hit one, a records popup, and the big "New record" card.
+- Finish dialog and a summary of the workout.
+- Settings: units, default rest time, auto-start, vibration, keep screen on, save and restore backups, and the version.
+
+## [0.1.0] · 2026-10-01 · The engine underneath
+
+### Added
+- The on-phone database and a starter list of 93 exercises, tagged by muscle, equipment and type.
+- The rules for records (heavier weight, or more reps at the same or heavier weight; warm-ups don't count; exercises are never compared with each other), streaks, weekly muscle coverage, and backups.
+
+## [0.0.3] · 2026-10-01 · Update check
+
+### Added
+- A small marker on Home to check that updates actually reach the installed app.
+
+## [0.0.2] · 2026-10-01 · Install button
+
+### Added
+- An Install Monolog button on Home, so it installs as a proper full-screen app and not a Chrome shortcut.
+
+## [0.0.1] · 2026-10-01 · Pull to refresh
+
+### Fixed
+- Pull down to refresh works again in a normal Chrome tab. It's only turned off inside the installed app.
+
+## [0.0.0] · 2026-10-01 · First version
+
+### Added
+- The first installable version on GitHub Pages: four tabs, the black and white look, the "Update ready" bar, and the setup that tests every change before it goes live.

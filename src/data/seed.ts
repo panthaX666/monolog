@@ -120,7 +120,7 @@ const ROWS: Row[] = [
   ["Farmer's Carry", TIMED, ['forearms', 'traps'], ['abs', 'glutes'], ['dumbbell'], FB],
   ['Burpee', BW, ['quads', 'chest'], ['abs', 'front_delts'], ['bodyweight'], FB],
 
-  // Cardio (no muscle groups — doesn't count toward weekly coverage)
+  // Cardio (no muscle groups, doesn't count toward weekly coverage)
   ['Treadmill Run', CARDIO, [], [], ['cardio_machine'], ['cardio']],
   ['Outdoor Run', CARDIO, [], [], ['other'], ['cardio']],
   ['Walk', CARDIO, [], [], ['other'], ['cardio']],

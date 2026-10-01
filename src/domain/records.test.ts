@@ -5,7 +5,7 @@ import { mkSet, wr } from './testkit';
 const PUSH = 'rope-tricep-pushdown';
 const RAISE = 'cable-lat-raise';
 
-// The Pilot's real Rope Tricep Pushdown history from the old app (Sept 2026).
+// My real Rope Tricep Pushdown history from the old app (Sept 2026).
 const pushdownHistory = () => [
   wr(PUSH, '2026-09-16', 50, 9),
   wr(PUSH, '2026-09-16', 50, 4),
@@ -63,7 +63,7 @@ describe('records: weight × reps', () => {
   });
 
   it('REGRESSION (old app bug): never compares against another exercise', () => {
-    // Old app: logging Cable Lat Raise 20×7 showed "NEW RECORD 24.0 → 56.25 kg" — the 56.25 came from
+    // Old app: logging Cable Lat Raise 20×7 showed "NEW RECORD 24.0 → 56.25 kg". The 56.25 came from
     // Rope Tricep Pushdown 45×10. Mixed input must produce no lat-raise record here.
     const raise = [
       wr(RAISE, '2025-11-03', 20, 8),
@@ -74,9 +74,9 @@ describe('records: weight × reps', () => {
     ];
     const mixed = [...pushdownHistory(), wr(PUSH, '2026-09-30', 45, 11), ...raise];
     const raiseEvents = computeRecords(RAISE, 'weight_reps', mixed);
-    // 20×7 is below the 20×8 best — no record today.
+    // 20×7 is below the 20×8 best, no record today.
     expect(eventFor(raiseEvents, 'raise-today')).toBeUndefined();
-    // Only lat-raise sets ever appear as "before"/"after" — nothing near the pushdown's 45 kg.
+    // Only lat-raise sets ever appear as "before"/"after", nothing near the pushdown's 45 kg.
     expect(raiseEvents.every((e) => e.exerciseId === RAISE && (e.atWeightKg ?? 0) <= 20)).toBe(true);
     // The one genuine lat-raise record: 15×15 in Jan beat 8 reps at ≥15 kg.
     expect(raiseEvents.map((e) => [e.kind, e.after.value])).toEqual([['reps', 15]]);
@@ -94,7 +94,7 @@ describe('records: weight × reps', () => {
     const sets = [
       wr(PUSH, '2026-09-20', 40, 10, { id: 'old', loggedAt: '2026-09-20T10:00:00Z' }),
       wr(PUSH, '2026-09-25', 40, 12, { id: 'mid', loggedAt: '2026-09-25T10:00:00Z' }),
-      // Edited on the 30th, but belongs to the 21st — before 'mid'.
+      // Edited on the 30th, but belongs to the 21st, before 'mid'.
       wr(PUSH, '2026-09-21', 40, 11, { id: 'edit', loggedAt: '2026-09-30T10:00:00Z' }),
     ];
     const events = computeRecords(PUSH, 'weight_reps', sets);

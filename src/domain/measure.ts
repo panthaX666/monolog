@@ -1,7 +1,7 @@
 import type { ExerciseType, Unit, WorkoutSet } from './types';
 import { displayWeight, formatWeight } from './units';
 
-// Formatting of the non-weight measures (SPEC D30): time, distance, pace — and one place that
+// Formatting of the non-weight measures (SPEC D30): time, distance, pace, and one place that
 // turns any set into short text for its exercise type.
 
 /** 90 → "1:30", 3725 → "1:02:05". */

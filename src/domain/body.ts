@@ -1,7 +1,7 @@
 import { addDays, daysBetween } from './dates';
 import type { BodyEntry, DayKey, MetricKey } from './types';
 
-// Body metrics — SPEC N13. Derived values are computed on display, never stored.
+// Body metrics, SPEC N13. Derived values are computed on display, never stored.
 
 export const METRICS: { key: MetricKey; label: string; unit: 'kg' | '%' | 'cm'; step: number; decimals: number }[] = [
   { key: 'weightKg', label: 'Body weight', unit: 'kg', step: 0.1, decimals: 1 },

@@ -1,4 +1,4 @@
-/* Monolog design tokens — see docs/SPEC.md §5. Gold (--accent) means progress: records + streak only. */
+/* Monolog design tokens, see docs/SPEC.md §5. Gold (--accent) means progress: records + streak only. */
 :root {
   --bg: #000000;
   --surface-1: #111113;

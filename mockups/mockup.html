@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Gym tracker — design mockup (Home + Active workout)</title>
+<title>Gym tracker, design mockup (Home + Active workout)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -376,7 +376,7 @@ function showCelebration(rec) {
   </div></div>`;
 }
 
-let undo = null;  // { ei, si, set, t } — last deleted set, restorable for 5 s
+let undo = null;  // { ei, si, set, t }, last deleted set, restorable for 5 s
 function deleteSet(ei, si) {
   const row = document.querySelector(`[data-row="${ei}-${si}"]`);
   const doIt = () => {
@@ -486,7 +486,7 @@ function workoutView() {
       <div class="ex-head"><div class="ex-name">${esc(ex.name)}</div>
         <div style="display:flex;gap:6px"><button class="trophy ${ex.sets.some(x => x.logged && x.rec) ? 'gold' : ''}" data-a="trophy" data-e="${ei}" aria-label="Records"><span class="rec-sq"></span></button><button class="trophy" aria-label="More">⋯</button></div></div>
       ${pin ? `<div class="pin">📌 ${esc(pin)}</div>` : ''}
-      <div class="ex-meta">${last ? `Last · ${last.date}: ${last.sets.map(([a, b]) => `${a}×${b}`).join(' · ')}${last.note ? `<br><span class="note">“${esc(last.note)}”</span>` : ''}` : 'First time — no history yet'}</div>
+      <div class="ex-meta">${last ? `Last · ${last.date}: ${last.sets.map(([a, b]) => `${a}×${b}`).join(' · ')}${last.note ? `<br><span class="note">“${esc(last.note)}”</span>` : ''}` : 'First time, no history yet'}</div>
       <div class="cols"><span></span><span>SET</span><span>KG</span><span>REPS</span><span></span><span></span></div>
       ${rows}
       <button class="add-set" data-a="addset" data-e="${ei}">＋ Add set</button>

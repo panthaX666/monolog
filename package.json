@@ -1,9 +1,9 @@
 {
   "name": "monolog",
   "private": true,
-  "version": "0.4.2",
+  "version": "0.4.3",
   "type": "module",
-  "description": "Monolog — a monochrome, offline-first gym tracker (PWA).",
+  "description": "A monochrome, offline-first gym tracker (PWA).",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

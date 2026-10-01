@@ -1,4 +1,4 @@
-// Entities — see docs/SPEC.md §6. Dates are ISO strings; DayKey is a local calendar date.
+// Entities, see docs/SPEC.md §6. Dates are ISO strings; DayKey is a local calendar date.
 
 export type ID = string;
 /** Local calendar date 'YYYY-MM-DD', fixed when the record is created. */
@@ -90,7 +90,7 @@ export interface WorkoutSet {
   /** Weight exactly as entered (added weight for bodyweight exercises). */
   weight: number | null;
   unit: Unit;
-  /** `weight` normalised to kg — used for comparisons and charts only. */
+  /** `weight` normalised to kg, used for comparisons and charts only. */
   weightKg: number | null;
   reps: number | null;
   durationSec: number | null;

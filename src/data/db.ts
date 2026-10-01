@@ -10,7 +10,7 @@ import type {
   WorkoutSet,
 } from '../domain/types';
 
-// IndexedDB schema — docs/SPEC.md §6. Every schema change = a new `this.version(n)` block with an
+// IndexedDB schema, docs/SPEC.md §6. Every schema change = a new `this.version(n)` block with an
 // upgrade function AND a test that runs it against data from version n-1 (SPEC §6.6).
 
 /** Unique name: all GitHub Pages sites under panthax666.github.io share one storage origin. */

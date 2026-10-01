@@ -63,7 +63,7 @@ export function fieldText(set: WorkoutSet, field: PadField, type: ExerciseType, 
 const ARIA: Record<PadField, string> = { weight: 'Weight', reps: 'Reps', duration: 'Time', distance: 'Distance' };
 
 function lastLine(card: CardData, unit: Unit) {
-  if (!card.last.length) return { text: 'First time — no history yet', note: null };
+  if (!card.last.length) return { text: 'First time. No history yet', note: null };
   const sets = card.last.filter((s) => s.kind === 'working').map((s) => formatSet(s, card.exercise.type, unit));
   const noted = card.last.find((s) => s.note.trim());
   const idx = noted ? card.last.filter((s) => s.kind === 'working').indexOf(noted) + 1 : 0;

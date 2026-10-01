@@ -2,7 +2,7 @@ import { addDays, daysBetween, weekStart } from './dates';
 import { GROUPS, MUSCLE_GROUP, type MuscleGroup } from './muscles';
 import type { DayKey, Muscle } from './types';
 
-// Weekly coverage — SPEC §6.3. Week = Monday–Sunday. Per session and group: 1 if any exercise hits
+// Weekly coverage, SPEC §6.3. Week = Monday–Sunday. Per session and group: 1 if any exercise hits
 // the group as a primary muscle, else ½ if only as a secondary muscle. Counted per session, not per set.
 
 export const WEEKLY_TARGET = 2;

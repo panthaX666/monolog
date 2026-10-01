@@ -34,7 +34,7 @@ jobs:
         with:
           path: dist
 
-  # Deploy only runs if every check above passed — a failing test never reaches the phone.
+  # Deploy only runs if every check above passed, so a failing test never reaches the phone.
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
@@ -65,7 +65,7 @@ jobs:
         run: |
           V=$(node -p "require('./package.json').version")
           if gh release view "v$V" > /dev/null 2>&1; then
-            echo "v$V already released — nothing to do."
+            echo "v$V already released, nothing to do."
             exit 0
           fi
           bash scripts/release-notes.sh "$V" > notes.txt

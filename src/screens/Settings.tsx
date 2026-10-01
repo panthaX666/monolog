@@ -244,7 +244,7 @@ export function Settings() {
         </div>
         <div className="kv">
           <span>Storage</span>
-          <span>{persist === 'persisted' ? 'Protected' : persist === 'best-effort' ? 'Not protected — install the app' : '…'}</span>
+          <span>{persist === 'persisted' ? 'Protected' : persist === 'best-effort' ? 'Not protected, install the app' : '…'}</span>
         </div>
       </section>
 

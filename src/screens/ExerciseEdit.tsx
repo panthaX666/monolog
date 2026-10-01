@@ -156,7 +156,7 @@ function ExerciseForm({ existing, logged }: { existing: Exercise | null; logged:
 
       <div className="field">
         <span className="t-label">Type</span>
-        {typeLocked && <p className="t-meta" style={{ margin: '4px 0' }}>Locked — this exercise already has logged sets.</p>}
+        {typeLocked && <p className="t-meta" style={{ margin: '4px 0' }}>The type can't change because this exercise already has logged sets.</p>}
         {TYPES.map((t) => (
           <button
             key={t.value}

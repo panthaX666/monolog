@@ -20,7 +20,7 @@ export function displayWeight(weight: number | null, unit: Unit, displayUnit: Un
   return Math.round(fromKg(toKg(weight, unit), displayUnit) * 10) / 10;
 }
 
-/** "45.0", "42.5", "43.75" — one decimal minimum, no float noise. */
+/** "45.0", "42.5", "43.75", one decimal minimum, no float noise. */
 export function formatWeight(value: number | null): string {
   if (value == null) return '—';
   const rounded = Math.round(value * 100) / 100;

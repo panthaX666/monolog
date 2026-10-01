@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-// Hash routing (/#/history) — GitHub Pages can't serve deep links for a single-page app.
+// Hash routing (/#/history), GitHub Pages can't serve deep links for a single-page app.
 export const TABS = ['home', 'history', 'exercises', 'body'] as const;
 export type Tab = (typeof TABS)[number];
 

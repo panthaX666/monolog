@@ -1,7 +1,7 @@
 import { addDays, daysBetween } from './dates';
 import type { DayKey } from './types';
 
-// Streak rules — docs/SPEC.md §6.2 (decisions D12, D22).
+// Streak rules, docs/SPEC.md §6.2 (decisions D12, D22).
 // A day is trained (≥1 logged working set) › rest (rest day logged) › empty.
 // Trained or rest days extend the streak. An empty day breaks it once its grace window has passed
 // (a day can still be filled in until the end of the next day). A 4th consecutive rest day breaks it.
@@ -25,7 +25,7 @@ export interface Streak {
   startDay: DayKey | null;
   /** Consecutive rest days at the end of the current streak (0…3). */
   restRun: number;
-  /** Yesterday is empty but still fillable — log it (workout or rest day) or the streak breaks tonight. */
+  /** Yesterday is empty but still fillable. Log it (workout or rest day) or the streak breaks tonight. */
   yesterdayPending: boolean;
   /** Today already counts toward the streak. */
   todayDone: boolean;
@@ -130,7 +130,7 @@ export function streakSegments({ trainedDays, restDays, today }: StreakInput): S
   for (let day = known[0]!; day <= today; day = addDays(day, 1)) {
     const status = dayStatus(day, trained, rest);
     if (status === 'empty') {
-      if (day === today || day === yesterday) continue; // still fillable — not a break yet
+      if (day === today || day === yesterday) continue; // still fillable, not a break yet
       close();
       continue;
     }

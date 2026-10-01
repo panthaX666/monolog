@@ -143,7 +143,7 @@ export function weeklySetsByGroup(
   return GROUPS.map((g) => ({ group: g, sets: totals.get(g)! }));
 }
 
-/** "Nice" axis ticks covering [min, max] — about `count` steps of 1/2/2.5/5×10ⁿ. */
+/** "Nice" axis ticks covering [min, max], about `count` steps of 1/2/2.5/5×10ⁿ. */
 export function niceTicks(min: number, max: number, count = 4): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [];
   if (min === max) {

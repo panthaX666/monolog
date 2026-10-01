@@ -102,7 +102,7 @@ export function LineChart({ label, points, line, format, invert = false, height 
           {' '}
           · {formatDay(shownPt.day)}
           {shownPt.record && ' · ★ record'}
-          {!a && points.length > 1 && ' · latest — tap the chart for others'}
+          {!a && points.length > 1 && ' · latest, tap the chart for others'}
         </span>
       </div>
       <svg

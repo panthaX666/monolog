@@ -37,7 +37,7 @@ export function useWakeLock(active: boolean): void {
         });
         if (cancelled) void lock.release();
       } catch {
-        /* denied (e.g. battery saver) — not critical */
+        /* denied (e.g. battery saver), not critical */
       }
     };
     const onVisible = () => void acquire();

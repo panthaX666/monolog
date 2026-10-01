@@ -104,7 +104,7 @@ export function ExerciseDetail({ id }: { id: string }) {
           {ex.archivedAt && (
             <>
               <br />
-              <b>Archived</b> — hidden from the exercise picker.
+              <b>Archived.</b> It's hidden from the exercise picker.
             </>
           )}
         </p>
@@ -241,7 +241,7 @@ function RecordsTab({ ex, sets, events, unit }: { ex: Exercise; sets: WorkoutSet
       </section>
 
       <div className="t-label list-label">Record timeline</div>
-      {events.length === 0 && <p className="t-meta">No records beaten yet — your first workout set the baseline.</p>}
+      {events.length === 0 && <p className="t-meta">No records beaten yet. Your first workout is the starting point.</p>}
       {events.map((e) => {
         const s = setById.get(e.setId);
         if (!s) return null;

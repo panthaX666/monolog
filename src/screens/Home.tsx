@@ -77,12 +77,12 @@ function StreakCard({ today }: { today: string }) {
       </div>
       {s.yesterdayPending && (
         <p className="t-meta warn" style={{ marginBottom: 0 }}>
-          Yesterday is empty — log a workout or rest day for it before midnight to keep the streak.
+          Yesterday is empty. Log a workout or rest day for it before midnight to keep the streak.
         </p>
       )}
       {s.current > 0 && s.restRun === MAX_REST_RUN && !s.todayDone && (
         <p className="t-meta warn" style={{ marginBottom: 0 }}>
-          3 rest days in a row — train today to keep the streak.
+          3 rest days in a row. Train today to keep the streak.
         </p>
       )}
     </section>
@@ -153,7 +153,7 @@ export function Home() {
     try {
       await startSession(getDb());
     } catch {
-      /* a workout is already open — just resume it */
+      /* a workout is already open, just resume it */
     }
     navigate('#/workout');
   };

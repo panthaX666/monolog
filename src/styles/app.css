@@ -1,4 +1,4 @@
-/* Screens & components — ported from mockups/mockup.html (SPEC §5). */
+/* Screens & components, ported from mockups/mockup.html (SPEC §5). */
 
 /* ===== Buttons & controls ===== */
 .btn-danger { background: rgba(255, 69, 58, 0.14); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.35); }

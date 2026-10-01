@@ -76,7 +76,7 @@ test('discard a workout with logged sets, after confirming', async ({ page }) =>
   await expect(page.getByTestId('rest-chip')).not.toHaveClass(/running/);
   await expect(workoutClock(page)).toHaveText(/● 0:0\d/);
   await addExercise(page, 'bench press', 'Bench Press');
-  await expect(page.getByRole('region', { name: 'Bench Press' }).getByText('First time — no history yet')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Bench Press' }).getByText('First time. No history yet')).toBeVisible();
 });
 
 test('going Home keeps the workout and its timer running', async ({ page }) => {

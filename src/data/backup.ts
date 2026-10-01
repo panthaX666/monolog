@@ -13,7 +13,7 @@ import {
 import { SCHEMA_VERSION, type MonologDB } from './db';
 import { recomputeRecords, RepoError } from './repo';
 
-// Backup file — docs/SPEC.md §6.5.
+// Backup file, docs/SPEC.md §6.5.
 
 export interface BackupData {
   settings: Settings[];
@@ -96,7 +96,7 @@ export function parseBackup(
   if (!isObj(raw) || raw.app !== 'monolog') return fail('this file is not from Monolog');
   const version = raw.schemaVersion;
   if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) return fail('unknown version');
-  if (version > currentVersion) return fail('it was made by a newer version of Monolog — update the app first');
+  if (version > currentVersion) return fail('it was made by a newer version of Monolog, so update the app first');
   if (!isObj(raw.data)) return fail('missing data');
 
   let data = raw.data as Record<string, unknown[]>;

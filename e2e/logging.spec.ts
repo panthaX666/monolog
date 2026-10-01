@@ -37,7 +37,7 @@ test('log a first workout, finish, then beat it for a rep record', async ({ page
   await addExercise(page, 'rope push', 'Rope Tricep Pushdown');
 
   const pushdown = card(page, 'Rope Tricep Pushdown');
-  await expect(pushdown.getByText('First time — no history yet')).toBeVisible();
+  await expect(pushdown.getByText('First time. No history yet')).toBeVisible();
 
   // Blank first set: ✓ opens the pad instead of logging.
   await pushdown.getByRole('button', { name: 'Log set' }).first().click();

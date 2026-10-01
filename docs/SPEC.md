@@ -1,8 +1,8 @@
-# Monolog — Product & Technical Spec (Release 1)
+# Monolog spec (Release 1)
 
-> Monochrome, offline-first gym tracker. **Tracker, not a planner.**
-> Status: Phase 4 draft · 2026-10-01 · Owner: panthaX666
-> Visual reference: `mockups/mockup.html` (clickable Home + Active workout)
+How the app works and why. Monolog is a gym tracker, not a planner: you log what you did, it doesn't tell you what to do.
+
+This was written before building and has been kept up to date since. The original clickable design is in `mockups/mockup.html`.
 
 ---
 
@@ -15,7 +15,7 @@
 | Later | Public release on Google Play (Capacitor wrapper), possible paywall |
 | Platform | Installable PWA, hosted on GitHub Pages (`panthax666.github.io/monolog`) |
 | Data | 100% on-device (IndexedDB). No accounts, no server, no cloud sync |
-| Import from old app | None — fresh start (old backup is AES-encrypted) |
+| Import from old app | None, starting fresh (the old backup is encrypted) |
 
 ### Design principles
 1. **Mid-workout logging comes first.** First set logged in ≤ 3 taps; typical set = 1 tap.
@@ -42,8 +42,8 @@
 | D15 | Notes resurfaced: last-session note, pinned exercise note, notes list per exercise |
 | D16/D23 | Body metrics kept, redesigned, weekly check-in banner |
 | D17 | No import |
-| D18/D19 | ~~Public from start / paywall~~ — superseded by D26 |
-| D20 | Tracker, not planner — no routines |
+| D18/D19 | ~~Public from start / paywall~~ (replaced by D26) |
+| D20 | Tracker, not planner. No routines |
 | D21 | Exercises organised by **tags** (muscles primary/secondary, equipment, type, custom), searchable |
 | D22 | Rest day may be logged for yesterday until end of today |
 | D24 | Charts included |
@@ -85,7 +85,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 | ID | Screen | Contents |
 |---|---|---|
 | N1 | Home | Date header + ⚙ · Streak card (count, dot row, gold run pill, rest-days x/3) · This-week coverage · Body-weight card + sparkline · Recent records · Check-in banner (on check-in day) · **[Rest day] [▶ Start workout]** (or Resume) |
-| N2 | Active workout | Header: [‹ Home] · elapsed · **rest timer chip (top-right)** · exercise cards · full-width **[＋ Add exercise]** · Finish |
+| N2 | Active workout | Header: [‹ Home] · elapsed · **rest timer chip (top-right)** · exercise cards · full-width **[＋ Add exercise]** under the cards · Discard · **Finish** pinned at the bottom |
 | N3 | Exercise picker | Search · muscle chips · equipment chips · Recent · A–Z · "＋ Create '…'" · long-press multi-select |
 | N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · [Next] [✓ Log set] |
 | N5 | Rest timer | Chip: idle `⏱ 1:30 ▶`, running (white) countdown, done (pulse + vibrate) |
@@ -106,7 +106,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 
 ## 4. Key flows
 
-### F1 — Log a workout (core)
+### F1: Log a workout (core)
 1. Home → **Start workout** → session created, clock running.
 2. **＋ Add exercise** → picker (Recent first; keyboard opens only when search tapped).
 3. Tap exercise → card appears; sets pre-filled (faded) from last session; last-session note + pinned note shown.
@@ -117,25 +117,25 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 
 Rules: every logged set persisted immediately (crash-safe); session open > 4 h → prompt to finish at last-set time; tapping ✓ on a logged set un-logs it.
 
-### F2 — Rest day
+### F2: Rest day
 Home → Rest day → Today / Yesterday (if yesterday empty and within grace) → streak updates.
 
-### F3 — History & records
+### F3: History & records
 In workout: tap exercise name → detail sheet. Outside: Exercises → search → detail. Records button → popover (max weight, max reps @ weight, best at current weight).
 
-### F4 — Create exercise
+### F4: Create exercise
 Picker search, no match → "＋ Create …" → name + type required, rest optional → added to workout.
 
-### F5 — Body check-in
+### F5: Body check-in
 Banner or Body tab → sheet pre-filled → adjust → Save → deltas + charts update.
 
-### F6 — Edit past workout
+### F6: Edit past workout
 History → session → edit like N2. Records recomputed silently (no celebration).
 
-### F7 — Repeat
+### F7: Repeat
 Session detail → Repeat → new session with same exercises, sets pre-filled from that session.
 
-### F8 — Backup / restore
+### F8: Backup / restore
 Settings → Export → JSON via share sheet. Banner every 10 workouts without a backup. Restore → pick file → preview counts → confirm replace.
 
 ---
@@ -156,8 +156,8 @@ Settings → Export → JSON via share sheet. Banner every 10 workouts without a
 | `accent-dim` | `rgba(245,197,66,.14)` | Streak run pill, glows |
 | `danger` | `#FF453A` | Failure marker, destructive confirms |
 
-### Type — Inter (self-hosted, tabular numerals)
-Display 44/700 · Title 30/700 · Exercise name 19/700 · Set values 22/600 · Body 16 · Meta 14 · Label 12/600 uppercase +0.08em.
+### Type: Inter (bundled, tabular numbers)
+Display 44/700 · Title 30/700 · Exercise name 22/700 · Set values 18/500 · Body 16 · Meta 14 · Label 12/600 uppercase +0.08em.
 
 ### Layout
 4-pt spacing (4/8/12/16/20/24/32) · radii: card 20, button 14, pill 999 · targets: ✓ 48 (row 60), keys 60, primary 56, min 40.
@@ -219,7 +219,7 @@ interface Settings {
 Indexes: `sets: [exerciseId+loggedAt], sessionId, dayKey` · `sessions: dayKey, startedAt` · `bodyEntries: dayKey` · `recordEvents: exerciseId, at` · `exercises: &nameKey`.
 
 ### 6.1 Record rules (unit-tested)
-- Eligible: logged (`loggedAt != null`), `kind = 'working'`, **same exerciseId**. Order by training day (`dayKey`), then `loggedAt` — so a set added later to an old workout is compared against its own past.
+- Eligible: logged (`loggedAt != null`), `kind = 'working'`, **same exerciseId**. Order by training day (`dayKey`), then `loggedAt`, so a set added later to an old workout is compared against its own past.
 - First-ever eligible set of an exercise → no record.
 - **Weight:** `weightKg > max(prior weightKg)` (tolerance 0.001).
 - **Reps:** `reps > max(prior reps where prior.weightKg ≥ this.weightKg)`.
@@ -256,10 +256,10 @@ Every schema change = Dexie version bump + upgrade function + Vitest test runnin
 | Build | Vite |
 | Storage | Dexie.js (+ `dexie-react-hooks` live queries) |
 | PWA | `vite-plugin-pwa` (Workbox precache, `registerType: 'prompt'` → "Update ready · Tap to reload") |
-| Charts | Hand-rolled SVG (`src/components/Chart.tsx`) — data volumes are small; full control of mark specs, tap readout, table view and a11y; no extra dependency |
+| Charts | Hand-rolled SVG (`src/components/Chart.tsx`). The data is small, and this gives full control of mark specs, tap readout, table view and a11y; no extra dependency |
 | Styling | Plain CSS + custom-property tokens (from mockup) |
 | Font | `@fontsource-variable/inter` (bundled) |
-| Routing | Hash routing (`/#/history`) — GitHub Pages safe |
+| Routing | Hash routing (`/#/history`), which works on GitHub Pages |
 | Tests | Vitest (+ `fake-indexeddb`) for domain logic & migrations; Playwright (mobile viewport) for F1 |
 | CI/CD | GitHub Actions: install → typecheck → test → build → deploy to Pages. **Failing tests block deploy.** |
 | Web APIs | Screen Wake Lock (during workout), Vibration, `navigator.storage.persist()`, Web Share (backup/share) |

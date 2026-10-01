@@ -25,7 +25,7 @@ describe('seed library', () => {
     }
   });
 
-  it("includes the exercises from the Pilot's old app", () => {
+  it("includes the exercises from my old app", () => {
     const names = new Set(lib.map((e) => e.nameKey));
     for (const n of [
       'Bench Press', 'Pec Fly', 'Chest Press', 'Deadlift', 'Lat Pulldown', 'Seated Cable Row', 'Squat',

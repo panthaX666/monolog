@@ -424,7 +424,7 @@ function isComplete(type: ExerciseType, s: WorkoutSet): boolean {
 }
 
 /**
- * Log a set (✓). Returns the record it set, if any — the caller shows the celebration.
+ * Log a set (✓). Returns the record it set, if any. The caller shows the celebration.
  * If it was the last set of its card, a new pre-filled set is appended (D36).
  */
 export async function logSet(
@@ -530,7 +530,7 @@ export async function logRestDay(db: MonologDB, dayKey: DayKey, now: Date = new 
   });
 }
 
-/** Undo a rest day — only while it could still be logged. */
+/** Undo a rest day, only while it could still be logged. */
 export async function removeRestDay(db: MonologDB, dayKey: DayKey, now: Date = new Date()): Promise<void> {
   const today = toDayKey(now);
   if (dayKey !== today && dayKey !== addDays(today, -1))
