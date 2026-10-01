@@ -8,6 +8,7 @@ A monochrome, offline-first gym tracker.
 - Works fully offline after the first load; new versions show an *Update ready* banner.
 
 ## Docs
+- [`CHANGELOG.md`](CHANGELOG.md) — what changed in every version (also on the [Releases](https://github.com/panthaX666/monolog/releases) page)
 - [`docs/SPEC.md`](docs/SPEC.md) — product & technical spec
 - [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) — milestones
 - [`mockups/mockup.html`](mockups/mockup.html) — clickable design mockup

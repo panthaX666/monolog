@@ -48,3 +48,32 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # After a successful publish: if package.json has a new version, create its GitHub Release using
+  # that version's section of CHANGELOG.md. Updates that don't bump the version create no release.
+  release:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release for a new version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if gh release view "v$V" > /dev/null 2>&1; then
+            echo "v$V already released — nothing to do."
+            exit 0
+          fi
+          bash scripts/release-notes.sh "$V" > notes.txt
+          TITLE=$(head -1 notes.txt | cut -f2)
+          tail -n +2 notes.txt > body.md
+          {
+            echo
+            echo '---'
+            echo "Build \`${GITHUB_SHA::7}\` · [Open the app](https://panthax666.github.io/monolog/)"
+          } >> body.md
+          gh release create "v$V" --target "$GITHUB_SHA" --title "$TITLE" --notes-file body.md --latest

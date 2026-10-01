@@ -234,7 +234,9 @@ export function Settings() {
         <div className="t-label">About</div>
         <div className="kv">
           <span>Version</span>
-          <span className="mono">{__BUILD_SHA__}</span>
+          <span className="mono">
+            v{__APP_VERSION__} ({__BUILD_SHA__})
+          </span>
         </div>
         <div className="kv">
           <span>Built</span>
