@@ -10,6 +10,7 @@ import {
   type Exercise,
   type ExerciseType,
   type ID,
+  type MetricKey,
   type Muscle,
   type RecordEvent,
   type Session,
@@ -581,6 +582,18 @@ export async function saveBodyEntry(db: MonologDB, dayKey: DayKey, input: BodyIn
     };
     await db.bodyEntries.put(entry);
     return entry;
+  });
+}
+
+/** Remove one metric from a check-in; the check-in is deleted once nothing is left in it. */
+export async function clearBodyMetric(db: MonologDB, id: ID, key: MetricKey): Promise<void> {
+  await db.transaction('rw', db.bodyEntries, async () => {
+    const e = await db.bodyEntries.get(id);
+    if (!e) return;
+    const next = { ...e, [key]: null };
+    if (next.weightKg == null && next.bodyFatPct == null && next.muscleMassKg == null && next.waistCm == null && !next.note.trim())
+      await db.bodyEntries.delete(id);
+    else await db.bodyEntries.put(next);
   });
 }
 

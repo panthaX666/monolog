@@ -4,6 +4,7 @@ import { MonologDB } from './db';
 import {
   addExerciseToSession,
   addSet,
+  clearBodyMetric,
   createExercise,
   deleteSet,
   discardSession,
@@ -334,5 +335,15 @@ describe('editing the past & repeat', () => {
     const pushSets = await db.sets.where('sessionExerciseId').equals(ses[1]!.id).toArray();
     expect(pushSets.map((x) => [x.weight, x.reps, x.loggedAt])).toEqual([[40, 10, null]]);
     await expect(repeatSession(db, from.id)).rejects.toMatchObject({ code: 'session_open' });
+  });
+});
+
+describe('clearBodyMetric', () => {
+  it('clears one metric, and deletes the check-in when it becomes empty', async () => {
+    const e = await saveBodyEntry(db, '2026-09-30', { weightKg: 82.4, bodyFatPct: 18 });
+    await clearBodyMetric(db, e.id, 'bodyFatPct');
+    expect(await db.bodyEntries.get(e.id)).toMatchObject({ weightKg: 82.4, bodyFatPct: null });
+    await clearBodyMetric(db, e.id, 'weightKg');
+    expect(await db.bodyEntries.get(e.id)).toBeUndefined();
   });
 });

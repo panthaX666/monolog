@@ -2,15 +2,12 @@ import { useState } from 'react';
 import { getDb } from '../data/db';
 import { createExercise, RepoError } from '../data/repo';
 import type { MuscleGroup } from '../domain/muscles';
-import type { Exercise, ExerciseType } from '../domain/types';
+import type { Exercise } from '../domain/types';
 import { formatDay } from '../lib/format';
 import { FilterChips, matches, searchWords, subtitle, useExerciseIndex, type Filter } from './exerciseSearch';
 import { Sheet } from './Sheet';
 
 // Exercise picker (SPEC N3): search, tag filters, Recent, A–Z, create.
-
-/** Types the workout screen supports so far. Timed & cardio inputs arrive in M4. */
-export const LOGGABLE: ExerciseType[] = ['weight_reps', 'bodyweight_reps'];
 
 const GROUP_DEFAULT_MUSCLE = {
   chest: 'chest',
@@ -64,13 +61,12 @@ export function ExercisePicker({
   };
 
   const item = (e: Exercise) => {
-    const supported = LOGGABLE.includes(e.type);
     return (
-      <button key={e.id} className="list-item" disabled={!supported} onClick={() => onPick(e.id)} aria-label={e.name}>
+      <button key={e.id} className="list-item" onClick={() => onPick(e.id)} aria-label={e.name}>
         <span>
           {e.name}
           <br />
-          <small>{supported ? subtitle(e) : 'Timed & cardio logging arrives in M4'}</small>
+          <small>{subtitle(e)}</small>
         </span>
         <small>{excludeIds.has(e.id) ? 'In workout' : index?.last.has(e.id) ? formatDay(index.last.get(e.id)!) : ''}</small>
       </button>

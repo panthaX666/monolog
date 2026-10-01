@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Celebration, type CelebrationData } from '../components/Celebration';
-import { ExerciseCard, weightText } from '../components/ExerciseCard';
+import { ExerciseCard, fieldLabel, weightText } from '../components/ExerciseCard';
 import { ExercisePicker } from '../components/ExercisePicker';
-import { NumberPad, type PadField } from '../components/NumberPad';
+import { fieldsFor, NumberPad, type PadField } from '../components/NumberPad';
+import { formatKm, formatPace, formatSeconds } from '../domain/measure';
 import { RecordsPopover } from '../components/RecordsPopover';
 import { RestChip } from '../components/RestChip';
 import { Dialog, Sheet, Snackbar } from '../components/Sheet';
@@ -57,28 +58,54 @@ function useWriteQueue() {
 }
 
 function celebrationFor(ev: RecordEvent, card: CardData, set: WorkoutSet, unit: Unit): CelebrationData {
-  const bw = card.exercise.type === 'bodyweight_reps';
+  const type = card.exercise.type;
+  const bw = type !== 'weight_reps';
   const before = card.history.find((s) => s.id === ev.before.setId);
+  const base = { exerciseName: card.exercise.name, kind: ev.kind };
   const beforeLabel = formatDay(ev.before.dayKey);
-  if (ev.kind === 'weight') {
-    const b = before ? displayWeight(before.weight ?? 0, before.unit, unit)! : ev.before.value;
-    const a = displayWeight(set.weight ?? 0, set.unit, unit)!;
-    return {
-      exerciseName: card.exercise.name,
-      kind: 'weight',
-      delta: `+${formatWeight(Math.round((a - b) * 100) / 100)} ${unit}`,
-      before: { label: beforeLabel, value: `${formatWeight(b)} ${unit}` },
-      after: { label: 'Today', value: `${formatWeight(a)} ${unit}` },
-    };
+  const today = 'Today';
+  switch (ev.kind) {
+    case 'weight': {
+      const b = before ? displayWeight(before.weight ?? 0, before.unit, unit)! : ev.before.value;
+      const a = displayWeight(set.weight ?? 0, set.unit, unit)!;
+      return {
+        ...base,
+        delta: `+${formatWeight(Math.round((a - b) * 100) / 100)} ${unit}`,
+        before: { label: beforeLabel, value: `${formatWeight(b)} ${unit}` },
+        after: { label: today, value: `${formatWeight(a)} ${unit}` },
+      };
+    }
+    case 'reps': {
+      const n = ev.after.value - ev.before.value;
+      return {
+        ...base,
+        delta: `+${plural(n, 'rep')}`,
+        before: { label: beforeLabel, value: before ? `${weightText(before, unit, bw)} × ${ev.before.value}` : `${ev.before.value}` },
+        after: { label: today, value: `${weightText(set, unit, bw)} × ${set.reps}` },
+      };
+    }
+    case 'duration':
+      return {
+        ...base,
+        delta: `+${formatSeconds(ev.after.value - ev.before.value)}`,
+        before: { label: beforeLabel, value: formatSeconds(ev.before.value) },
+        after: { label: today, value: formatSeconds(ev.after.value) },
+      };
+    case 'distance':
+      return {
+        ...base,
+        delta: `+${((ev.after.value - ev.before.value) / 1000).toFixed(2)} km`,
+        before: { label: beforeLabel, value: formatKm(ev.before.value) },
+        after: { label: today, value: formatKm(ev.after.value) },
+      };
+    case 'pace':
+      return {
+        ...base,
+        delta: `−${formatSeconds((ev.before.value - ev.after.value) * 1000)} /km`,
+        before: { label: beforeLabel, value: formatPace(ev.before.value) },
+        after: { label: today, value: formatPace(ev.after.value) },
+      };
   }
-  const n = ev.after.value - ev.before.value;
-  return {
-    exerciseName: card.exercise.name,
-    kind: ev.kind,
-    delta: `+${plural(n, 'rep')}`,
-    before: { label: beforeLabel, value: before ? `${weightText(before, unit, bw)} × ${ev.before.value}` : `${ev.before.value}` },
-    after: { label: 'Today', value: `${weightText(set, unit, bw)} × ${set.reps}` },
-  };
 }
 
 /**
@@ -169,13 +196,21 @@ export function Workout({ editId }: { editId?: string } = {}) {
       buzz(res.record ? HAPTIC.record : HAPTIC.log);
       setRestDuration(restFor(card));
       if (settings.restAutoStart) startRest(restFor(card));
-      if (res.record && (res.record.kind === 'weight' || res.record.kind === 'reps')) {
+      if (res.record) {
         setCelebration(celebrationFor(res.record, card, res.set, unitFor(card)));
       }
     } catch (e) {
       if (e instanceof RepoError && e.code === 'incomplete_set') {
-        const fresh = await db.sets.get(set.id);
-        setPad({ setId: set.id, field: fresh?.weight == null && card.exercise.type === 'weight_reps' ? 'weight' : 'reps' });
+        // Open the pad on the first field that still needs a value.
+        const fresh = (await db.sets.get(set.id)) ?? set;
+        const type = card.exercise.type;
+        const missing = fieldsFor(type).find((f) =>
+          f === 'weight' ? type === 'weight_reps' && fresh.weight == null
+          : f === 'reps' ? !fresh.reps
+          : f === 'duration' ? !fresh.durationSec && !(type === 'cardio' && fresh.distanceM)
+          : !fresh.distanceM && !fresh.durationSec,
+        );
+        setPad({ setId: set.id, field: missing ?? fieldsFor(type)[0] });
       } else throw e;
     }
   };
@@ -332,15 +367,31 @@ export function Workout({ editId }: { editId?: string } = {}) {
       {padFound && pad && (
         <NumberPad
           key={pad.setId}
+          fields={fieldsFor(padFound.card.exercise.type)}
           field={pad.field}
-          weight={displayWeight(padFound.set.weight, padFound.set.unit, unitFor(padFound.card))}
-          reps={padFound.set.reps}
-          weightLabel={padFound.card.exercise.type === 'bodyweight_reps' ? `+${unitFor(padFound.card)}` : unitFor(padFound.card)}
+          values={{
+            weight: displayWeight(padFound.set.weight, padFound.set.unit, unitFor(padFound.card)),
+            reps: padFound.set.reps,
+            duration: padFound.set.durationSec,
+            distance: padFound.set.distanceM,
+          }}
+          labels={{
+            weight: fieldLabel('weight', padFound.card.exercise.type, unitFor(padFound.card)),
+            reps: 'Reps',
+            duration: 'Time',
+            distance: 'KM',
+          }}
           step={settings.weightStep}
           onChange={(field, value) =>
             void patch(
               padFound.set,
-              field === 'weight' ? { weight: value, unit: unitFor(padFound.card) } : { reps: value },
+              field === 'weight'
+                ? { weight: value, unit: unitFor(padFound.card) }
+                : field === 'reps'
+                  ? { reps: value }
+                  : field === 'duration'
+                    ? { durationSec: value }
+                    : { distanceM: value },
             )
           }
           onFieldChange={(field) => setPad({ setId: pad.setId, field })}

@@ -4,9 +4,11 @@ import { useSettings } from '../data/hooks';
 import { getStreak } from '../data/repo';
 import { GROUP_LABEL, GROUPS, MUSCLE_GROUP } from '../domain/muscles';
 import { displayWeight } from '../domain/units';
-import { weightText } from '../components/ExerciseCard';
+import { formatSet } from '../domain/measure';
 import { formatDuration, formatWeekday, plural } from '../lib/format';
 import { navigate } from '../lib/route';
+
+export const RECORD_LABEL = { weight: 'weight', reps: 'reps', duration: 'time', distance: 'distance', pace: 'pace' } as const;
 
 /** Workout summary (SPEC N7). */
 export function Summary({ sessionId }: { sessionId: string }) {
@@ -39,7 +41,11 @@ export function Summary({ sessionId }: { sessionId: string }) {
   const exById = new Map(exercises.filter(Boolean).map((e) => [e!.id, e!]));
   const duration = session.endedAt ? (Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000 : 0;
   const working = sets.filter((s) => s.kind === 'working');
-  const volume = working.reduce((sum, s) => sum + (displayWeight(s.weight ?? 0, s.unit, unit) ?? 0) * (s.reps ?? 0), 0);
+  // Volume = weight × reps, for weight-lifting sets only (not time or distance).
+  const volume = working
+    .filter((s) => exById.get(s.exerciseId)?.type === 'weight_reps')
+    .reduce((sum, s) => sum + (displayWeight(s.weight ?? 0, s.unit, unit) ?? 0) * (s.reps ?? 0), 0);
+  const unitOf = (exerciseId: string) => exById.get(exerciseId)?.unit ?? unit;
   const groups = GROUPS.filter((g) =>
     working.some((s) => exById.get(s.exerciseId)?.primaryMuscles.some((m) => MUSCLE_GROUP[m] === g)),
   );
@@ -79,12 +85,11 @@ export function Summary({ sessionId }: { sessionId: string }) {
           {records.map((r) => {
             const s = setById.get(r.setId)!;
             const ex = exById.get(r.exerciseId);
-            const bw = ex?.type === 'bodyweight_reps';
             return (
               <div className="kv" key={r.id}>
                 <span>{ex?.name}</span>
                 <span>
-                  {weightText(s, unit, bw)} × {s.reps} · {r.kind === 'weight' ? 'weight' : 'reps'}
+                  {ex ? formatSet(s, ex.type, unitOf(ex.id)) : ''} · {RECORD_LABEL[r.kind]}
                 </span>
               </div>
             );
@@ -97,11 +102,10 @@ export function Summary({ sessionId }: { sessionId: string }) {
         {data.ses.map((se) => {
           const ex = exById.get(se.exerciseId);
           const mine = sets.filter((s) => s.sessionExerciseId === se.id && s.kind === 'working');
-          const bw = ex?.type === 'bodyweight_reps';
           return (
             <div className="kv" key={se.id}>
               <span>{ex?.name}</span>
-              <span>{mine.map((s) => `${weightText(s, unit, bw)}×${s.reps}`).join(' · ') || 'warm-ups'}</span>
+              <span>{(ex && mine.map((s) => formatSet(s, ex.type, unitOf(ex.id))).join(' · ')) || 'warm-ups'}</span>
             </div>
           );
         })}

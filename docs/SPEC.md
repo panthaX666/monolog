@@ -223,6 +223,7 @@ Indexes: `sets: [exerciseId+loggedAt], sessionId, dayKey` · `sessions: dayKey, 
 - First-ever eligible set of an exercise → no record.
 - **Weight:** `weightKg > max(prior weightKg)` (tolerance 0.001).
 - **Reps:** `reps > max(prior reps where prior.weightKg ≥ this.weightKg)`.
+- Distance is entered and shown in km (stored in metres); time is typed microwave-style (130 → 1:30).
 - Bodyweight: weight = added kg. Timed: `durationSec` (at ≥ added weight). Cardio: longest `distanceM`, longest `durationSec`, fastest pace = lowest `durationSec/distanceM` vs prior efforts with distance ≥ this distance (precedence per set: distance › pace › time).
 - If a set is both weight and reps record → show weight.
 - Editing/deleting/un-logging a set recomputes RecordEvents for that exercise from that set's `loggedAt` onward; celebrations fire only for live logging.
@@ -255,7 +256,7 @@ Every schema change = Dexie version bump + upgrade function + Vitest test runnin
 | Build | Vite |
 | Storage | Dexie.js (+ `dexie-react-hooks` live queries) |
 | PWA | `vite-plugin-pwa` (Workbox precache, `registerType: 'prompt'` → "Update ready · Tap to reload") |
-| Charts | uPlot |
+| Charts | Hand-rolled SVG (`src/components/Chart.tsx`) — data volumes are small; full control of mark specs, tap readout, table view and a11y; no extra dependency |
 | Styling | Plain CSS + custom-property tokens (from mockup) |
 | Font | `@fontsource-variable/inter` (bundled) |
 | Routing | Hash routing (`/#/history`) — GitHub Pages safe |

@@ -50,7 +50,7 @@ Rule: domain logic (records, streaks, units, migrations) is test-first; CI block
 ## M4 — Body & charts
 1. Body tab, check-in sheet, metric detail, derived BMI / fat mass / lean mass (height in Settings).
 2. Weekly check-in banner on chosen day.
-3. uPlot charts: exercise (e1RM / top set / volume, range 3M·6M·1Y·All), body weight + 7-day average, weekly sets per muscle.
+3. SVG charts (uPlot dropped — see SPEC §7): exercise (e1RM / top set / volume, range 3M·6M·1Y·All), body weight + 7-day average, weekly sets per muscle.
 4. Home cards: coverage, body weight + sparkline, recent records.
 5. Timed & cardio exercise inputs + their records (duration, distance, pace).
 

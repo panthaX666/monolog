@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { BodyWeightCard, CheckInBanner, CoverageCard, CoverageSheet, RecordsCard } from '../components/HomeCards';
 import { Sheet } from '../components/Sheet';
+import { CheckInSheet } from './Body';
 import { getDb } from '../data/db';
 import { useHomeStreak, useOpenSession, useSettings, useToday } from '../data/hooks';
 import { logRestDay, removeRestDay, startSession } from '../data/repo';
@@ -144,6 +146,8 @@ export function Home() {
   const settings = useSettings();
   const now = useNow(1000);
   const [restSheet, setRestSheet] = useState(false);
+  const [checkIn, setCheckIn] = useState(false);
+  const [coverage, setCoverage] = useState(false);
 
   const start = async () => {
     try {
@@ -179,12 +183,12 @@ export function Home() {
           </section>
         )}
 
-        <section className="card">
-          <div className="t-label">Coming next</div>
-          <p className="t-meta" style={{ marginBottom: 0 }}>
-            Weekly muscle coverage, body weight, charts, and timed & cardio exercises arrive in M4.
-          </p>
-        </section>
+        <CheckInBanner today={today} onCheckIn={() => setCheckIn(true)} />
+        <div className="grid2">
+          <CoverageCard today={today} onOpen={() => setCoverage(true)} />
+          <BodyWeightCard onCheckIn={() => setCheckIn(true)} />
+        </div>
+        <RecordsCard />
       </main>
 
       <div className="bottom-actions">
@@ -205,6 +209,8 @@ export function Home() {
       </div>
 
       {restSheet && <RestDaySheet today={today} onClose={() => setRestSheet(false)} />}
+      {checkIn && <CheckInSheet onClose={() => setCheckIn(false)} />}
+      {coverage && <CoverageSheet today={today} onClose={() => setCoverage(false)} />}
     </>
   );
 }

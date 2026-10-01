@@ -1,8 +1,9 @@
 import type { CardData } from '../data/hooks';
-import type { RecordEvent, Unit, WorkoutSet } from '../domain/types';
+import { formatSeconds, formatSet } from '../domain/measure';
+import type { ExerciseType, RecordEvent, Unit, WorkoutSet } from '../domain/types';
 import { displayWeight, formatWeight } from '../domain/units';
 import { formatDay } from '../lib/format';
-import type { PadField } from './NumberPad';
+import { fieldsFor, type PadField } from './NumberPad';
 
 export interface CardHandlers {
   onLog: (set: WorkoutSet) => void;
@@ -31,12 +32,39 @@ export function weightText(set: Pick<WorkoutSet, 'weight' | 'unit'>, unit: Unit,
   return bodyweight && w === 0 ? '0' : formatWeight(w);
 }
 
+/** Column header for a pad field. */
+export function fieldLabel(field: PadField, type: ExerciseType, unit: Unit): string {
+  switch (field) {
+    case 'weight':
+      return type === 'weight_reps' ? unit.toUpperCase() : `+${unit.toUpperCase()}`;
+    case 'reps':
+      return 'REPS';
+    case 'duration':
+      return 'TIME';
+    case 'distance':
+      return 'KM';
+  }
+}
+
+/** A set's value for one field, as shown in the card. */
+export function fieldText(set: WorkoutSet, field: PadField, type: ExerciseType, unit: Unit): string {
+  switch (field) {
+    case 'weight':
+      return weightText(set, unit, type !== 'weight_reps');
+    case 'reps':
+      return set.reps == null ? '—' : String(set.reps);
+    case 'duration':
+      return formatSeconds(set.durationSec);
+    case 'distance':
+      return set.distanceM == null ? '—' : (set.distanceM / 1000).toFixed(2);
+  }
+}
+
+const ARIA: Record<PadField, string> = { weight: 'Weight', reps: 'Reps', duration: 'Time', distance: 'Distance' };
+
 function lastLine(card: CardData, unit: Unit) {
   if (!card.last.length) return { text: 'First time — no history yet', note: null };
-  const bw = card.exercise.type === 'bodyweight_reps';
-  const sets = card.last
-    .filter((s) => s.kind === 'working')
-    .map((s) => (bw && !s.weight ? `${s.reps}` : `${weightText(s, unit, bw)}×${s.reps}`));
+  const sets = card.last.filter((s) => s.kind === 'working').map((s) => formatSet(s, card.exercise.type, unit));
   const noted = card.last.find((s) => s.note.trim());
   const idx = noted ? card.last.filter((s) => s.kind === 'working').indexOf(noted) + 1 : 0;
   return {
@@ -46,7 +74,8 @@ function lastLine(card: CardData, unit: Unit) {
 }
 
 export function ExerciseCard({ card, unit, records, pad, touched, noteOpen, ...h }: Props) {
-  const bw = card.exercise.type === 'bodyweight_reps';
+  const type = card.exercise.type;
+  const [f1, f2] = fieldsFor(type);
   const hasRecord = card.sets.some((s) => s.loggedAt && records.has(s.id));
   const last = lastLine(card, unit);
   // Working sets are numbered 1…n; warm-ups show W.
@@ -84,8 +113,8 @@ export function ExerciseCard({ card, unit, records, pad, touched, noteOpen, ...h
       <div className="cols" aria-hidden="true">
         <span />
         <span>SET</span>
-        <span>{bw ? `+${unit.toUpperCase()}` : unit.toUpperCase()}</span>
-        <span>REPS</span>
+        <span>{fieldLabel(f1, type, unit)}</span>
+        <span>{fieldLabel(f2, type, unit)}</span>
         <span />
         <span />
       </div>
@@ -109,12 +138,11 @@ export function ExerciseCard({ card, unit, records, pad, touched, noteOpen, ...h
               >
                 {label}
               </button>
-              <button className={`val ${ghost} ${active('weight')}`} onClick={() => h.onPad(s, 'weight')} aria-label="Weight">
-                {weightText(s, unit, bw)}
-              </button>
-              <button className={`val ${ghost} ${active('reps')}`} onClick={() => h.onPad(s, 'reps')} aria-label="Reps">
-                {s.reps ?? '—'}
-              </button>
+              {[f1, f2].map((f) => (
+                <button key={f} className={`val ${ghost} ${active(f)}`} onClick={() => h.onPad(s, f)} aria-label={ARIA[f]}>
+                  {fieldText(s, f, type, unit)}
+                </button>
+              ))}
               <button className={`note-btn ${s.note.trim() ? 'has' : ''}`} onClick={() => h.onNote(s)} aria-label="Note">
                 ✎
               </button>

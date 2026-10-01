@@ -9,8 +9,8 @@ import { href, navigate } from '../lib/route';
 const TYPES: { value: ExerciseType; label: string; hint: string }[] = [
   { value: 'weight_reps', label: 'Weight × reps', hint: 'Barbell, dumbbell, cable, machine' },
   { value: 'bodyweight_reps', label: 'Bodyweight', hint: 'Reps, with optional added weight' },
-  { value: 'timed', label: 'Timed', hint: 'Holds like a plank — logging arrives in M4' },
-  { value: 'cardio', label: 'Cardio', hint: 'Distance and/or time — logging arrives in M4' },
+  { value: 'timed', label: 'Timed', hint: 'Holds like a plank, with optional added weight' },
+  { value: 'cardio', label: 'Cardio', hint: 'Distance and/or time; pace is worked out' },
 ];
 const STANDARD_TAGS = ['compound', 'isolation', 'full_body'];
 const TAG_LABEL: Record<string, string> = { compound: 'Compound', isolation: 'Isolation', full_body: 'Full body' };

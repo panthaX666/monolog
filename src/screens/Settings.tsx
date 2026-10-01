@@ -16,6 +16,7 @@ import { formatClock, formatDay, plural } from '../lib/format';
 import { navigate } from '../lib/route';
 import { requestPersistence, type PersistState } from '../lib/storage';
 import { toDayKey } from '../domain/dates';
+import { METRICS } from '../domain/body';
 
 const REST_STEPS = [30, 45, 60, 75, 90, 105, 120, 150, 180, 210, 240, 300];
 
@@ -134,6 +135,61 @@ export function Settings() {
           <span>Start automatically when a set is logged</span>
           <Toggle on={s.restAutoStart} onChange={(v) => set({ restAutoStart: v })} label="Auto-start rest timer" />
         </div>
+      </section>
+
+      <section className="card">
+        <div className="t-label">Body</div>
+        <div className="menu-row">
+          <label htmlFor="height">Height (for BMI)</label>
+          <div className="stepper">
+            <input
+              id="height"
+              key={s.heightCm ?? 'none'}
+              className="num-input"
+              inputMode="numeric"
+              defaultValue={s.heightCm ?? ''}
+              placeholder="—"
+              onBlur={(e) => {
+                const n = parseFloat(e.target.value);
+                set({ heightCm: Number.isFinite(n) && n >= 100 && n <= 250 ? Math.round(n) : null });
+              }}
+              aria-label="Height in centimetres"
+            />
+            <span className="t-meta unit">cm</span>
+          </div>
+        </div>
+        <div className="menu-row">
+          <span>Weekly check-in day</span>
+        </div>
+        <div className="seg seg-wide" role="group" aria-label="Weekly check-in day">
+          {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((d, i) => {
+            const day = ((i + 1) % 7) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+            return (
+              <button key={d} className={s.checkInDay === day ? 'on' : ''} onClick={() => set({ checkInDay: day })} aria-pressed={s.checkInDay === day}>
+                {d[0]}
+              </button>
+            );
+          })}
+        </div>
+        <div className="t-label" style={{ marginTop: 16 }}>
+          Track
+        </div>
+        {METRICS.map((m) => (
+          <div className="menu-row" key={m.key}>
+            <span>{m.label}</span>
+            <Toggle
+              on={s.trackedMetrics.includes(m.key)}
+              label={`Track ${m.label}`}
+              onChange={(v) =>
+                set({
+                  trackedMetrics: v
+                    ? METRICS.map((x) => x.key).filter((k) => k === m.key || s.trackedMetrics.includes(k))
+                    : s.trackedMetrics.filter((k) => k !== m.key),
+                })
+              }
+            />
+          </div>
+        ))}
       </section>
 
       <section className="card">

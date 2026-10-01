@@ -6,12 +6,12 @@ import { useNow } from './lib/clock';
 import { setVibrationEnabled } from './lib/device';
 import { formatClock } from './lib/format';
 import { navigate, useRoute } from './lib/route';
+import { Body, MetricDetail } from './screens/Body';
 import { ExerciseDetail } from './screens/ExerciseDetail';
 import { ExerciseEdit } from './screens/ExerciseEdit';
 import { Exercises } from './screens/Exercises';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
-import { Placeholder } from './screens/Placeholder';
 import { Settings } from './screens/Settings';
 import { Summary } from './screens/Summary';
 import { Workout } from './screens/Workout';
@@ -50,6 +50,9 @@ export function App() {
     case 'exercise':
       body = <ExerciseDetail key={route.id} id={route.id} />;
       break;
+    case 'metric':
+      body = <MetricDetail key={route.key} metric={route.key} />;
+      break;
     case 'exerciseEdit':
       body = <ExerciseEdit key={route.id ?? 'new'} id={route.id} />;
       break;
@@ -62,12 +65,13 @@ export function App() {
         ) : route.tab === 'exercises' ? (
           <Exercises />
         ) : (
-          <Placeholder title="Body" milestone="M4" />
+          <Body />
         );
   }
 
   // Tab screens and exercise pages (a sub-page of Exercises) keep the tab bar.
-  const tabBar = route.view === 'tab' ? route.tab : route.view === 'exercise' ? 'exercises' : null;
+  const tabBar =
+    route.view === 'tab' ? route.tab : route.view === 'exercise' ? 'exercises' : route.view === 'metric' ? 'body' : null;
 
   return (
     <div className="app">

@@ -11,6 +11,7 @@ export type Route =
   | { view: 'session'; id: string }
   | { view: 'exercise'; id: string }
   | { view: 'exerciseEdit'; id: string | null }
+  | { view: 'metric'; key: string }
   | { view: 'settings' };
 
 export function parseRoute(hash: string): Route {
@@ -26,6 +27,7 @@ export function parseRoute(hash: string): Route {
   if (first === 'exercise' && second === 'new') return { view: 'exerciseEdit', id: null };
   if (first === 'exercise' && second && third === 'edit') return { view: 'exerciseEdit', id: second };
   if (first === 'exercise' && second) return { view: 'exercise', id: second };
+  if (first === 'metric' && second) return { view: 'metric', key: second };
   return { view: 'tab', tab: (TABS as readonly string[]).includes(first) ? (first as Tab) : 'home' };
 }
 
@@ -43,6 +45,7 @@ export const href = {
   exercise: (id: string) => `#/exercise/${encodeURIComponent(id)}`,
   exerciseEdit: (id: string) => `#/exercise/${encodeURIComponent(id)}/edit`,
   exerciseNew: () => '#/exercise/new',
+  metric: (key: string) => `#/metric/${key}`,
 };
 
 export function navigate(hash: string, replace = false): void {
