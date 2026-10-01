@@ -77,7 +77,7 @@ test('body: check in, see it on Body and Home, BMI from height, delete an entry'
   await sheet.getByRole('textbox', { name: /Body weight/ }).fill('82.4');
   await sheet.getByRole('textbox', { name: /Body fat/ }).fill('18.2');
   await sheet.getByRole('button', { name: '✓ Save' }).click();
-  await expect(page.getByRole('button', { name: 'Body weight' })).toContainText('82.4');
+  await expect(page.getByRole('button', { name: 'Body weight', exact: true })).toContainText('82.4');
 
   await tab(page, 'Body').click();
   await expect(page.locator('.hero-num')).toHaveText('82.4');
