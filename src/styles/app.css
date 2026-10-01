@@ -101,6 +101,7 @@
   grid-template-columns: 1fr 2fr;
   gap: var(--s3);
   padding: var(--s3) var(--s4);
+  flex: none;
 }
 .bottom-actions .resume { grid-column: 1 / -1; }
 .resume-bar {
@@ -113,8 +114,9 @@
 }
 
 /* ===== Workout ===== */
-.workout { display: flex; flex-direction: column; height: 100%; }
+.workout { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .hdr {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -230,7 +232,8 @@
 .add-set { width: 100%; height: 44px; color: var(--text-2); font-weight: 600; font-size: 15px; margin-top: 4px; }
 .finish { width: 100%; margin-top: var(--s4); }
 .footer {
-  padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom));
+  padding: var(--s3) var(--s4) max(var(--s3), env(safe-area-inset-bottom));
+  flex: none;
   border-top: 1px solid var(--border);
   background: var(--bg);
 }
