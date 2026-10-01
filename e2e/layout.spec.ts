@@ -33,7 +33,16 @@ for (const size of SIZES) {
 
     await page.getByRole('button', { name: '▶ Start workout' }).click();
     const add = page.getByRole('button', { name: '＋ Add exercise' });
+    const finish = page.getByRole('button', { name: 'Finish workout' });
+    const discard = page.getByRole('button', { name: 'Discard workout' });
     await fullyVisible(page, add); // empty workout
+    await fullyVisible(page, finish);
+    await fullyVisible(page, discard);
+    // Discard sits just above Finish, with breathing room, and below Add exercise.
+    const [a, d, f] = [(await add.boundingBox())!, (await discard.boundingBox())!, (await finish.boundingBox())!];
+    expect(d.y).toBeGreaterThan(a.y + a.height + 16);
+    expect(f.y - (d.y + d.height)).toBeGreaterThanOrEqual(16);
+    expect(f.y - (d.y + d.height)).toBeLessThanOrEqual(80);
 
     for (const [q, name] of [
       ['bench press', 'Bench Press'],
@@ -44,7 +53,9 @@ for (const size of SIZES) {
       await page.getByRole('searchbox', { name: 'Search exercises' }).fill(q!);
       await page.getByRole('dialog', { name: 'Add exercise' }).getByRole('button', { name, exact: true }).click();
     }
-    await fullyVisible(page, add); // long workout: content scrolls, button stays put
+    await fullyVisible(page, finish); // long workout: list scrolls, Finish stays put
+    await add.scrollIntoViewIfNeeded();
+    await fullyVisible(page, add);
     await fullyVisible(page, page.getByRole('button', { name: 'Back to Home' }));
   });
 }

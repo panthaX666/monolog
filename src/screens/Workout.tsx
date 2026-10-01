@@ -323,33 +323,38 @@ export function Workout({ editId }: { editId?: string } = {}) {
           />
         ))}
 
-        {cards.length === 0 ? (
-          <div className="placeholder" style={{ minHeight: '50%' }}>
+        {cards.length === 0 && (
+          <div className="placeholder" style={{ minHeight: '40%' }}>
             <div>
               <div className="t-h2">Empty workout</div>
-              <p className="t-meta">Add your first exercise below.</p>
+              <p className="t-meta">Add your first exercise.</p>
             </div>
           </div>
-        ) : live ? (
-          <button className="btn btn-secondary finish" onClick={() => setOverlay({ kind: 'finish' })}>
-            Finish workout
-          </button>
-        ) : (
-          <button className="btn btn-secondary finish" onClick={() => navigate('#/history')}>
-            Done
-          </button>
         )}
 
-        {/* Always available, kept low and full-width — far from the ✓ column. */}
+        {/* Add exercise sits under the cards; Finish is the fixed bottom button (swapped on request so
+            they're never confused). */}
+        <button className="btn btn-primary add-exercise" onClick={() => setOverlay({ kind: 'picker' })}>
+          ＋ Add exercise
+        </button>
+
+        {/* Pushed to the bottom of the screen, just above Finish; far from the ✓ column. */}
+        <div className="push" aria-hidden="true" />
         <button className="btn btn-danger discard" onClick={() => setOverlay({ kind: 'discard' })}>
           {live ? 'Discard workout' : 'Delete workout'}
         </button>
       </main>
 
       <footer className="footer">
-        <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setOverlay({ kind: 'picker' })}>
-          ＋ Add exercise
-        </button>
+        {live ? (
+          <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setOverlay({ kind: 'finish' })}>
+            Finish workout
+          </button>
+        ) : (
+          <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => navigate('#/history')}>
+            Done
+          </button>
+        )}
       </footer>
 
       {snack && (
