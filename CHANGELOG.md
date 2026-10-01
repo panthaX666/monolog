@@ -6,6 +6,11 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [0.4.4] · 2026-10-01 · No more waist
+
+### Removed
+- Waist is gone from the Body tab, the check-in sheet and the tracked metrics in Settings. Any waist numbers you already logged stay in your backups, they just aren't shown.
+
 ## [0.4.3] · 2026-10-01 · Cleaner wording
 
 ### Changed

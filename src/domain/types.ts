@@ -159,7 +159,7 @@ export const DEFAULT_SETTINGS: Settings = {
   wakeLock: true,
   heightCm: null,
   checkInDay: 0,
-  trackedMetrics: ['weightKg', 'bodyFatPct', 'muscleMassKg', 'waistCm'],
+  trackedMetrics: ['weightKg', 'bodyFatPct', 'muscleMassKg'],
   lastBackupAt: null,
   workoutsSinceBackup: 0,
 };

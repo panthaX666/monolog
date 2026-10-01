@@ -7,7 +7,6 @@ export const METRICS: { key: MetricKey; label: string; unit: 'kg' | '%' | 'cm'; 
   { key: 'weightKg', label: 'Body weight', unit: 'kg', step: 0.1, decimals: 1 },
   { key: 'bodyFatPct', label: 'Body fat', unit: '%', step: 0.1, decimals: 1 },
   { key: 'muscleMassKg', label: 'Muscle mass', unit: 'kg', step: 0.1, decimals: 1 },
-  { key: 'waistCm', label: 'Waist', unit: 'cm', step: 0.5, decimals: 1 },
 ];
 
 export function metricInfo(key: MetricKey) {

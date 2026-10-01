@@ -179,7 +179,7 @@ export function Body() {
           <p className="t-h2" style={{ marginTop: 0 }}>
             No check-ins yet
           </p>
-          <p className="t-meta">Log your weight (and body fat, muscle mass, waist if you measure them) once a week to see trends.</p>
+          <p className="t-meta">Log your weight (and body fat and muscle mass if you measure them) once a week to see trends.</p>
           <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setCheckIn(true)}>
             Check in now
           </button>
