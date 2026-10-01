@@ -12,6 +12,7 @@ import {
   addExerciseToSession,
   addSet,
   deleteSet,
+  discardSession,
   finishSession,
   logSet,
   removeExerciseFromSession,
@@ -28,7 +29,7 @@ import { useNow } from '../lib/clock';
 import { buzz, HAPTIC, useWakeLock } from '../lib/device';
 import { formatClock, formatDay, formatDuration, formatTime, plural } from '../lib/format';
 import { navigate } from '../lib/route';
-import { setRestDuration, startRest } from '../lib/restTimer';
+import { setRestDuration, startRest, stopRest } from '../lib/restTimer';
 
 const STALE_MS = 4 * 60 * 60 * 1000;
 
@@ -38,6 +39,7 @@ type Overlay =
   | { kind: 'exMenu'; seId: string }
   | { kind: 'setMenu'; setId: string }
   | { kind: 'finish' }
+  | { kind: 'discard' }
   | { kind: 'remove'; seId: string }
   | null;
 
@@ -169,6 +171,14 @@ export function Workout() {
   const menuSet = overlay?.kind === 'setMenu' ? findSet(overlay.setId)?.set : undefined;
   const unloggedCount = cards.reduce((n, c) => n + c.sets.filter((s) => !s.loggedAt).length, 0);
 
+  const discard = async () => {
+    await enqueue(() => discardSession(db, session.id));
+    stopRest();
+    setOverlay(null);
+    setPad(null);
+    navigate('#/', true);
+  };
+
   const finish = async (endAt?: Date) => {
     const { kept } = await enqueue(() => finishSession(db, session.id, new Date(), endAt));
     setOverlay(null);
@@ -241,6 +251,11 @@ export function Workout() {
             Finish workout
           </button>
         )}
+
+        {/* Always available, kept low and full-width — far from the ✓ column. */}
+        <button className="btn btn-danger discard" onClick={() => setOverlay({ kind: 'discard' })}>
+          Discard workout
+        </button>
       </main>
 
       <footer className="footer">
@@ -386,6 +401,28 @@ export function Workout() {
             })}
           </div>
         </Sheet>
+      )}
+
+      {overlay?.kind === 'discard' && (
+        <Dialog onClose={() => setOverlay(null)} label="Discard workout">
+          <div className="t-h2">
+            Discard workout?
+            {loggedAll.length > 0 && ` ${plural(loggedAll.length, 'logged set')} will be deleted.`}
+          </div>
+          <p className="t-meta">
+            {loggedAll.length > 0
+              ? 'This deletes the whole workout and can’t be undone.'
+              : 'Nothing has been logged. The workout and its timer will be removed.'}
+          </p>
+          <div className="dialog-actions">
+            <button className="btn btn-secondary" onClick={() => setOverlay(null)}>
+              Cancel
+            </button>
+            <button className="btn btn-danger" onClick={() => void discard()}>
+              Discard
+            </button>
+          </div>
+        </Dialog>
       )}
 
       {overlay?.kind === 'finish' && (

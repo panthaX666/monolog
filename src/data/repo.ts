@@ -200,6 +200,23 @@ export async function finishSession(
   });
 }
 
+/**
+ * Discard: delete the workout and everything in it. Records that came from its sets are rebuilt
+ * from what remains. Returns how many logged sets were deleted.
+ */
+export async function discardSession(db: MonologDB, sessionId: ID): Promise<{ deletedLoggedSets: number }> {
+  return db.transaction('rw', [db.sessions, db.sessionExercises, db.sets, db.exercises, db.recordEvents], async () => {
+    await must(db.sessions.get(sessionId), 'Session');
+    const sets = await db.sets.where('sessionId').equals(sessionId).toArray();
+    const logged = sets.filter((s) => s.loggedAt != null);
+    await db.sets.bulkDelete(sets.map((s) => s.id));
+    await db.sessionExercises.where('sessionId').equals(sessionId).delete();
+    await db.sessions.delete(sessionId);
+    for (const exerciseId of new Set(logged.map((s) => s.exerciseId))) await recomputeRecords(db, exerciseId);
+    return { deletedLoggedSets: logged.length };
+  });
+}
+
 // ───────────────────────── Exercises within a session ─────────────────────────
 
 function blankSet(se: SessionExercise, dayKey: DayKey, order: number, unit: Unit): WorkoutSet {

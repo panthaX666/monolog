@@ -6,9 +6,11 @@ import {
   addSet,
   createExercise,
   deleteSet,
+  discardSession,
   ensureReady,
   finishSession,
   getCoverage,
+  getOpenSession,
   getSettings,
   getStreak,
   logRestDay,
@@ -126,6 +128,36 @@ describe('workout flow', () => {
     expect(await finishSession(db, s.id)).toEqual({ kept: false });
     expect(await db.sessions.count()).toBe(0);
     expect(await db.sets.count()).toBe(0);
+  });
+
+  it('discard deletes the workout, its sets and its records, leaving history intact', async () => {
+    await workout('2026-09-28', { [PUSH]: [[45, 10]] });
+    const s = await startSession(db, at('2026-09-30', 9));
+    const { sets } = await addExerciseToSession(db, s.id, PUSH);
+    await updateSet(db, sets[0]!.id, { reps: 12 });
+    await logSet(db, sets[0]!.id, at('2026-09-30', 10));
+    expect(await db.recordEvents.count()).toBe(1);
+
+    expect(await discardSession(db, s.id)).toEqual({ deletedLoggedSets: 1 });
+    expect(await db.sessions.get(s.id)).toBeUndefined();
+    expect(await db.sets.where('sessionId').equals(s.id).count()).toBe(0);
+    expect(await db.sessionExercises.where('sessionId').equals(s.id).count()).toBe(0);
+    expect(await db.recordEvents.count()).toBe(0); // the 45×12 record went with it
+    expect(await db.sets.count()).toBe(1); // 28 Sep untouched
+    expect(await getOpenSession(db)).toBeUndefined();
+    await expect(startSession(db, at('2026-09-30', 12))).resolves.toBeTruthy(); // can start again
+  });
+
+  it('discarding an empty workout', async () => {
+    const s = await startSession(db, at('2026-09-30'));
+    expect(await discardSession(db, s.id)).toEqual({ deletedLoggedSets: 0 });
+    expect(await db.sessions.count()).toBe(0);
+  });
+
+  it('an open workout with exercises but nothing logged stays open until finished or discarded', async () => {
+    const s = await startSession(db, at('2026-09-30'));
+    await addExerciseToSession(db, s.id, PUSH);
+    expect((await getOpenSession(db))?.id).toBe(s.id);
   });
 
   it('refuses to log an incomplete set', async () => {
