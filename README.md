@@ -1,6 +1,6 @@
 # Monolog
 
-A monochrome, offline-first gym tracker. Tracker, not a planner.
+A monochrome, offline-first gym tracker.
 
 **App:** https://panthax666.github.io/monolog/ — open in Chrome on Android → ⋮ → *Install app*.
 
