@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { digitsToSeconds, formatSeconds, secondsToDigits } from '../domain/measure';
 import type { ExerciseType } from '../domain/types';
 import { formatWeight, stepWeight } from '../domain/units';
@@ -43,7 +43,8 @@ interface Props {
 
 const KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', 'del'] as const;
 const DURATION_STEP = 15;
-const NAME: Record<PadField, string> = { weight: 'weight', reps: 'reps', duration: 'time', distance: 'distance' };
+// A Log tap this soon after Enter is a double tap on the same spot, not a real log.
+const ENTER_GUARD_MS = 400;
 
 /** Value → editable buffer. Durations edit as digits (microwave-style), distance as km. */
 function toBuf(field: PadField, v: number | null): string {
@@ -74,6 +75,8 @@ function show(field: PadField, v: number | null): string {
  * weight and time. Every change is saved immediately.
  */
 export function NumberPad({ fields, field, values, labels, step, onChange, onFieldChange, onLog, onClose }: Props) {
+  // Set when Enter moves to the second field; typing anything clears it (see ENTER_GUARD_MS).
+  const enteredAt = useRef(0);
   const [edit, setEdit] = useState<{ field: PadField; buf: string; fresh: boolean }>({
     field,
     buf: toBuf(field, values[field]),
@@ -83,6 +86,7 @@ export function NumberPad({ fields, field, values, labels, step, onChange, onFie
   const decimals = field === 'weight' || field === 'distance';
 
   const commit = (buf: string, fresh: boolean) => {
+    enteredAt.current = 0;
     setEdit({ field, buf, fresh });
     onChange(field, fromBuf(field, buf));
   };
@@ -115,7 +119,14 @@ export function NumberPad({ fields, field, values, labels, step, onChange, onFie
   };
 
   const [first, second] = fields;
-  const other = field === first ? second : first;
+  const enter = () => {
+    enteredAt.current = Date.now();
+    onFieldChange(second);
+  };
+  const log = () => {
+    if (Date.now() - enteredAt.current < ENTER_GUARD_MS) return;
+    onLog();
+  };
 
   return (
     <Sheet onClose={onClose} dim={false} label="Number pad">
@@ -155,12 +166,15 @@ export function NumberPad({ fields, field, values, labels, step, onChange, onFie
         ))}
       </div>
       <div className="pad-actions">
-        <button className="btn btn-secondary" onClick={() => onFieldChange(other)}>
-          {field === first ? `Next: ${NAME[second]} →` : `← ${NAME[first][0]!.toUpperCase()}${NAME[first].slice(1)}`}
-        </button>
-        <button className="btn btn-primary" onClick={onLog}>
-          ✓ Log set
-        </button>
+        {field === first ? (
+          <button className="btn btn-secondary" onClick={enter}>
+            Enter
+          </button>
+        ) : (
+          <button className="btn btn-primary" onClick={log}>
+            ✓ Log set
+          </button>
+        )}
       </div>
     </Sheet>
   );

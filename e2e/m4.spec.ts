@@ -59,7 +59,7 @@ test('cardio: distance and time, shown in the summary', async ({ page }) => {
   const row = page.getByRole('region', { name: 'Treadmill Run' }).getByTestId('set-row').first();
   await row.getByRole('button', { name: 'Distance' }).click();
   await pad(page, '5');
-  await page.getByRole('button', { name: 'Next: time →' }).click();
+  await page.getByRole('button', { name: 'Enter', exact: true }).click();
   await pad(page, '3000');
   await expect(page.getByTestId('pad-distance')).toHaveText('5.00');
   await expect(page.getByTestId('pad-duration')).toHaveText('30:00');

@@ -16,7 +16,7 @@ async function logSets(page: Page, exercise: string, sets: [string, string][]) {
     await row.getByRole('button', { name: 'Weight' }).click();
     const pad = page.getByRole('dialog', { name: 'Number pad' });
     for (const k of kg) await pad.getByRole('button', { name: k, exact: true }).click();
-    await page.getByRole('button', { name: 'Next: reps →' }).click();
+    await page.getByRole('button', { name: 'Enter', exact: true }).click();
     for (const k of reps) await pad.getByRole('button', { name: k, exact: true }).click();
     await page.getByRole('button', { name: '✓ Log set' }).click();
     await expect(row.getByRole('button', { name: 'Un-log set' })).toBeVisible();

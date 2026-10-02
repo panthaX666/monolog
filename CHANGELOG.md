@@ -6,6 +6,15 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [0.4.5] · 2026-10-02 · Number pad and new exercises
+
+### Changed
+- The number pad has one big button now. While you type the weight it says **Enter** and moves you to reps. Once you're on reps it turns into the white **✓ Log set**. No more hitting Log set by accident after typing the weight.
+- If you tap Enter twice by mistake, the second tap doesn't log the set.
+
+### Added
+- Creating an exercise from the picker opens a small "New exercise" screen. You can set the main muscle, the muscles it also works, and the equipment, each from a list. All optional, so you can still just hit Create.
+
 ## [0.4.4] · 2026-10-01 · No more waist
 
 ### Removed

@@ -319,7 +319,7 @@
 .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 var(--s4); }
 .key { height: 60px; border-radius: 14px; background: var(--surface-2); font-size: 26px; font-weight: 600; }
 .key:active { background: var(--surface-3); }
-.pad-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--s3); padding: var(--s3) var(--s4) var(--s4); }
+.pad-actions { display: grid; gap: var(--s3); padding: var(--s3) var(--s4) var(--s4); }
 
 /* ===== Picker ===== */
 .search {
@@ -353,6 +353,28 @@
 .list-item small { color: var(--text-3); font-size: 13px; }
 .list-item:disabled { opacity: 0.45; }
 .list-item.create { font-weight: 600; }
+.list-item .check-mark { color: var(--text-2); font-weight: 600; min-width: 24px; text-align: right; }
+.list-item[aria-pressed='true'] .check-mark { color: var(--text-1); }
+.btn-small { height: 40px; padding: 0 16px; font-size: 15px; }
+.new-exercise { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; }
+.new-exercise .t-meta { margin: 4px 2px 8px; }
+.pick-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  font-size: 16px;
+  text-align: left;
+}
+.pick-row span { color: var(--text-2); }
+.pick-row b { font-weight: 600; text-align: right; }
+.pick-row b.empty { color: var(--text-2); font-weight: 500; }
+.sheet-foot { flex: none; padding: 12px 16px 16px; border-top: 1px solid var(--border); }
 
 /* ===== Celebration ===== */
 .celebrate { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.72); display: grid; place-items: center; animation: fade-in 0.2s var(--ease); }

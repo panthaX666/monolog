@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { getDb } from '../data/db';
-import { createExercise, RepoError } from '../data/repo';
 import type { MuscleGroup } from '../domain/muscles';
 import type { Exercise } from '../domain/types';
 import { formatDay } from '../lib/format';
 import { FilterChips, matches, searchWords, subtitle, useExerciseIndex, type Filter } from './exerciseSearch';
+import { NewExercise } from './NewExercise';
 import { Sheet } from './Sheet';
 
 // Exercise picker (SPEC N3): search, tag filters, Recent, A–Z, create.
@@ -29,7 +28,7 @@ export function ExercisePicker({
 }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const index = useExerciseIndex();
 
   const words = searchWords(query);
@@ -44,22 +43,6 @@ export function ExercisePicker({
           .slice(0, 6);
   const exact = index?.exercises.some((e) => e.nameKey === words.join(' '));
 
-  const create = async () => {
-    setError(null);
-    try {
-      const name = query.trim().replace(/\b\p{Ll}/gu, (c) => c.toUpperCase());
-      const ex = await createExercise(getDb(), {
-        name,
-        type: 'weight_reps',
-        primaryMuscles: filter?.kind === 'group' ? [GROUP_DEFAULT_MUSCLE[filter.value]] : [],
-        equipment: filter?.kind === 'equip' ? [filter.value] : ['other'],
-      });
-      onPick(ex.id);
-    } catch (e) {
-      setError(e instanceof RepoError ? e.message : 'Could not create exercise');
-    }
-  };
-
   const item = (e: Exercise) => {
     return (
       <button key={e.id} className="list-item" onClick={() => onPick(e.id)} aria-label={e.name}>
@@ -72,6 +55,19 @@ export function ExercisePicker({
       </button>
     );
   };
+
+  if (creating)
+    return (
+      <Sheet onClose={onClose} tall label="New exercise">
+        <NewExercise
+          initialName={query.trim().replace(/\b\p{Ll}/gu, (c) => c.toUpperCase())}
+          initialPrimary={filter?.kind === 'group' ? [GROUP_DEFAULT_MUSCLE[filter.value]] : []}
+          initialEquipment={filter?.kind === 'equip' ? [filter.value] : []}
+          onCreated={onPick}
+          onBack={() => setCreating(false)}
+        />
+      </Sheet>
+    );
 
   return (
     <Sheet onClose={onClose} tall label="Add exercise">
@@ -105,14 +101,9 @@ export function ExercisePicker({
         </div>
         {all.map(item)}
         {words.length > 0 && !exact && (
-          <button className="list-item create" onClick={() => void create()}>
+          <button className="list-item create" onClick={() => setCreating(true)}>
             ＋ Create “{query.trim()}”
           </button>
-        )}
-        {error && (
-          <p className="t-meta" style={{ color: 'var(--danger)' }}>
-            {error}
-          </p>
         )}
       </div>
     </Sheet>

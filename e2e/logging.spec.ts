@@ -44,7 +44,7 @@ test('log a first workout, finish, then beat it for a rep record', async ({ page
   await expect(page.getByRole('dialog', { name: 'Number pad' })).toBeVisible();
   await page.getByRole('dialog', { name: 'Number pad' }).getByText('KG').click();
   await typeOnPad(page, '45');
-  await page.getByRole('button', { name: 'Next: reps →' }).click();
+  await page.getByRole('button', { name: 'Enter', exact: true }).click();
   await typeOnPad(page, '10');
   await expect(page.getByTestId('pad-weight')).toHaveText('45.0');
   await expect(page.getByTestId('pad-reps')).toHaveText('10');
@@ -116,7 +116,7 @@ test('set types, notes and survive a reload mid-workout', async ({ page }) => {
 
   await row.getByRole('button', { name: 'Weight' }).click();
   await typeOnPad(page, '60');
-  await page.getByRole('button', { name: 'Next: reps →' }).click();
+  await page.getByRole('button', { name: 'Enter', exact: true }).click();
   await typeOnPad(page, '8');
   await page.getByRole('dialog', { name: 'Number pad' }).press('Escape');
 

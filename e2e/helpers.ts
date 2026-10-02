@@ -19,7 +19,7 @@ export async function logSets(page: Page, exercise: string, sets: [string, strin
     const row = card.getByTestId('set-row').nth(from + i);
     await row.getByRole('button', { name: 'Weight' }).click();
     await pad(page, kg);
-    await page.getByRole('button', { name: 'Next: reps →' }).click();
+    await page.getByRole('button', { name: 'Enter', exact: true }).click();
     await pad(page, reps);
     await page.getByRole('button', { name: '✓ Log set' }).click();
     await expect(row.getByRole('button', { name: 'Un-log set' })).toBeVisible();

@@ -87,7 +87,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 | N1 | Home | Date header + ⚙ · Streak card (count, dot row, gold run pill, rest-days x/3) · This-week coverage · Body-weight card + sparkline · Recent records · Check-in banner (on check-in day) · **[Rest day] [▶ Start workout]** (or Resume) |
 | N2 | Active workout | Header: [‹ Home] · elapsed · **rest timer chip (top-right)** · exercise cards · full-width **[＋ Add exercise]** under the cards · Discard · **Finish** pinned at the bottom |
 | N3 | Exercise picker | Search · muscle chips · equipment chips · Recent · A–Z · "＋ Create '…'" · long-press multi-select |
-| N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · [Next] [✓ Log set] |
+| N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · one button: [Enter] on the first field, [✓ Log set] on the second |
 | N5 | Rest timer | Chip: idle `⏱ 1:30 ▶`, running (white) countdown, done (pulse + vibrate) |
 | N6 | Celebration | Large gold card (D41) |
 | N7 | Workout summary | Duration, exercises, sets, volume, records, muscles, streak, [Share] [Done] |
@@ -124,7 +124,7 @@ Home → Rest day → Today / Yesterday (if yesterday empty and within grace) �
 In workout: tap exercise name → detail sheet. Outside: Exercises → search → detail. Records button → popover (max weight, max reps @ weight, best at current weight).
 
 ### F4: Create exercise
-Picker search, no match → "＋ Create …" → name + type required, rest optional → added to workout.
+Picker search, no match → "＋ Create …" → New exercise sheet: name, plus optional Main muscle, Also works and Equipment, each picked from a list → Create → added to workout.
 
 ### F5: Body check-in
 Banner or Body tab → sheet pre-filled → adjust → Save → deltas + charts update.
