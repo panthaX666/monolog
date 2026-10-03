@@ -3,10 +3,11 @@ import { getDb } from '../data/db';
 import { useSettings } from '../data/hooks';
 import { getStreak } from '../data/repo';
 import { GROUP_LABEL, GROUPS, MUSCLE_GROUP } from '../domain/muscles';
-import { displayWeight } from '../domain/units';
 import { formatSet } from '../domain/measure';
 import { formatDuration, formatWeekday, plural } from '../lib/format';
 import { navigate } from '../lib/route';
+import { sessionVolume } from '../lib/share';
+import { ShareButton } from '../components/ShareButton';
 
 export const RECORD_LABEL = { weight: 'weight', reps: 'reps', duration: 'time', distance: 'distance', pace: 'pace' } as const;
 
@@ -41,10 +42,7 @@ export function Summary({ sessionId }: { sessionId: string }) {
   const exById = new Map(exercises.filter(Boolean).map((e) => [e!.id, e!]));
   const duration = session.endedAt ? (Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000 : 0;
   const working = sets.filter((s) => s.kind === 'working');
-  // Volume = weight × reps, for weight-lifting sets only (not time or distance).
-  const volume = working
-    .filter((s) => exById.get(s.exerciseId)?.type === 'weight_reps')
-    .reduce((sum, s) => sum + (displayWeight(s.weight ?? 0, s.unit, unit) ?? 0) * (s.reps ?? 0), 0);
+  const volume = sessionVolume(sets, exById, unit);
   const unitOf = (exerciseId: string) => exById.get(exerciseId)?.unit ?? unit;
   const groups = GROUPS.filter((g) =>
     working.some((s) => exById.get(s.exerciseId)?.primaryMuscles.some((m) => MUSCLE_GROUP[m] === g)),
@@ -132,6 +130,7 @@ export function Summary({ sessionId }: { sessionId: string }) {
         </div>
       </section>
 
+      <ShareButton sessionId={sessionId} />
       <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate('#/', true)}>
         Done
       </button>

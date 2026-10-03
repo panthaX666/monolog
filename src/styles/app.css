@@ -558,3 +558,5 @@ button.link { color: var(--text-1); text-decoration: underline; font: inherit; }
 .rec-row { display: flex; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 0; border-top: 1px solid var(--border); font-size: 15px; text-align: left; }
 .rec-row:first-of-type { border-top: 0; margin-top: 4px; }
 .rec-row .t-meta { text-align: right; flex: none; }
+
+.share-past { margin-top: var(--s3); display: flex; flex-direction: column; gap: var(--s2); }

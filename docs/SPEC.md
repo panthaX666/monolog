@@ -90,7 +90,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 | N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · one button: [Enter] on the first field, [✓ Log set] on the second |
 | N5 | Rest timer | Chip: idle `⏱ 1:30 ▶`, running (white) countdown, done (pulse + vibrate) |
 | N6 | Celebration | Large gold card (D41) |
-| N7 | Workout summary | Duration, exercises, sets, volume, records, muscles, streak, [Share] [Done] |
+| N7 | Workout summary | Duration, exercises, sets, volume, records, muscles, streak, [Share] [Done]. Share makes a 1080×1350 image (muscles, stats, every working set, records in gold, current streak + last 7 days) and opens the share menu; past workouts have a Share workout button too |
 | N8 | History | Month calendar with joined streak bars (● trained, ○ rest, ◉ today) · session list |
 | N9 | Session detail | = N2 in edit mode + [Repeat] |
 | N10 | Exercises | Search + tag filters, library list |

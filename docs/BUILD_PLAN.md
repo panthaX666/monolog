@@ -60,7 +60,7 @@ Get an empty app onto the phone that installs and updates itself, before buildin
 5. Timed and cardio exercises and their records (time, distance, pace).
 
 ## M5: Polish (next, will be v1.0.0)
-1. Backup reminder every 10 workouts (already done in M2). Share a workout as text or an image.
+1. Backup reminder every 10 workouts (already done in M2). Share a workout as an image (done in v0.4.6).
 2. Drag to reorder exercises. Long press to pick several exercises at once in the picker.
 3. Test it with 3 years of fake data to make sure it stays fast. Accessibility and reduced motion check.
 4. Empty states and edge cases. If the app crashes, show a screen that still lets you save a backup.

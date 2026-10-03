@@ -6,6 +6,13 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [0.4.6] · 2026-10-03 · Share a workout
+
+### Added
+- A Share button on the workout summary, and a "Share workout" button on any past workout's page.
+- It makes an image (1080 × 1350) with the date, the muscles you trained, time, sets and volume, every exercise with its sets (records in gold), and your current streak with the last 7 days. Your phone's share menu opens so you can send it or save it to your photos.
+- Long workouts still fit: the text gets smaller, and if it really can't fit, the last few exercises become "+2 more exercises".
+
 ## [0.4.5] · 2026-10-02 · Number pad and new exercises
 
 ### Changed

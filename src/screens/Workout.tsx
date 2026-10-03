@@ -5,6 +5,7 @@ import { ExercisePicker } from '../components/ExercisePicker';
 import { fieldsFor, NumberPad, type PadField } from '../components/NumberPad';
 import { formatKm, formatPace, formatSeconds } from '../domain/measure';
 import { RecordsPopover } from '../components/RecordsPopover';
+import { ShareButton } from '../components/ShareButton';
 import { RestChip } from '../components/RestChip';
 import { Dialog, Sheet, Snackbar } from '../components/Sheet';
 import { getDb } from '../data/db';
@@ -337,6 +338,11 @@ export function Workout({ editId }: { editId?: string } = {}) {
         <button className="btn btn-primary add-exercise" onClick={() => setOverlay({ kind: 'picker' })}>
           ＋ Add exercise
         </button>
+        {editId && (
+          <div className="share-past">
+            <ShareButton sessionId={editId} label="Share workout" />
+          </div>
+        )}
 
         {/* Pushed to the bottom of the screen, just above Finish; far from the ✓ column. */}
         <div className="push" aria-hidden="true" />
