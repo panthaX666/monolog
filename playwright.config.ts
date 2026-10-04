@@ -11,6 +11,8 @@ export default defineConfig({
     ...devices['Pixel 7'],
     baseURL: 'http://localhost:4180/monolog/',
     serviceWorkers: 'block',
+    // The first-visit install screen is covered by install.spec.ts; everywhere else it's dismissed.
+    storageState: 'e2e/storage-state.json',
     channel: process.env.CI ? undefined : 'msedge',
     trace: 'retain-on-failure',
   },

@@ -27,7 +27,7 @@ window.addEventListener('appinstalled', () => {
   emit();
 });
 
-function isStandalone(): boolean {
+export function isStandalone(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches;
 }
 
@@ -53,4 +53,31 @@ export async function promptInstall(): Promise<void> {
   // The event is single-use; Chrome fires a new one if the user dismissed and it's still eligible.
   deferred = null;
   emit();
+}
+
+/** Which install instructions fit this device when there's no install button to offer. */
+export function installPlatform(): 'ios' | 'android' | 'desktop' {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  return 'desktop';
+}
+
+const DISMISS_KEY = 'monolog.installPrompt';
+
+/** The first-visit install screen shows in a browser tab until installed or dismissed. */
+export function installPromptDismissed(): boolean {
+  try {
+    return localStorage.getItem(DISMISS_KEY) === 'dismissed';
+  } catch {
+    return false;
+  }
+}
+
+export function dismissInstallPrompt(): void {
+  try {
+    localStorage.setItem(DISMISS_KEY, 'dismissed');
+  } catch {
+    /* private mode: it just shows again next visit */
+  }
 }

@@ -4,11 +4,12 @@ A monochrome, offline-first gym tracker.
 
 ## Install it
 
-1. Open **https://panthax666.github.io/monolog/** in Chrome on your Android phone.
-2. Tap **Install Monolog** on the home screen of the app.
-3. Done. It's on your phone like any other app and works without internet.
+<a href="https://panthax666.github.io/monolog/"><img src="docs/install-button.svg" alt="Install Monolog" width="260"></a>
 
-No Install button? Use Chrome's menu (⋮) and pick **Install app**. Don't pick "Create shortcut", that only makes a bookmark.
+Tap the button on your phone. The site opens with an **Install Monolog** button that adds it to your home screen like any other app, and it works without internet after that.
+
+- **iPhone:** iOS doesn't allow install buttons, so the site shows you the 3 steps instead (Share, then Add to Home Screen).
+- **Already installed?** Open it from your home screen.
 
 When there's a new version, a small **Update ready** bar shows up in the app. Tap it and you're on the latest one.
 

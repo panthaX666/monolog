@@ -1,0 +1,9 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4180",
+      "localStorage": [{ "name": "monolog.installPrompt", "value": "dismissed" }]
+    }
+  ]
+}

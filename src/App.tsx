@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { InstallPrompt } from './components/InstallPrompt';
 import { TabBar } from './components/TabBar';
 import { UpdateBanner } from './components/UpdateBanner';
 import { useOpenSession, useSettings } from './data/hooks';
 import { useNow } from './lib/clock';
 import { setVibrationEnabled } from './lib/device';
 import { formatClock } from './lib/format';
+import { installPromptDismissed, isStandalone } from './lib/install';
 import { navigate, useRoute } from './lib/route';
 import { Body, MetricDetail } from './screens/Body';
 import { ExerciseDetail } from './screens/ExerciseDetail';
@@ -30,6 +32,8 @@ export function App() {
   const route = useRoute();
   const settings = useSettings();
   const open = useOpenSession();
+  // First visit in a browser tab: offer to install before anything else.
+  const [installPrompt, setInstallPrompt] = useState(() => !isStandalone() && !installPromptDismissed());
 
   useEffect(() => setVibrationEnabled(settings.vibration), [settings.vibration]);
 
@@ -71,14 +75,23 @@ export function App() {
 
   // Tab screens and exercise pages (a sub-page of Exercises) keep the tab bar.
   const tabBar =
-    route.view === 'tab' ? route.tab : route.view === 'exercise' ? 'exercises' : route.view === 'metric' ? 'body' : null;
+    route.view === 'tab'
+      ? route.tab
+      : route.view === 'exercise'
+        ? 'exercises'
+        : route.view === 'metric'
+          ? 'body'
+          : null;
 
   return (
     <div className="app">
       {body}
       <UpdateBanner />
-      {tabBar && open && !(route.view === 'tab' && route.tab === 'home') && <ResumeBar startedAt={open.startedAt} />}
+      {tabBar && open && !(route.view === 'tab' && route.tab === 'home') && (
+        <ResumeBar startedAt={open.startedAt} />
+      )}
       {tabBar && <TabBar current={tabBar} />}
+      {installPrompt && <InstallPrompt onClose={() => setInstallPrompt(false)} />}
     </div>
   );
 }

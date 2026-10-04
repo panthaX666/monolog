@@ -617,3 +617,26 @@ button.link { color: var(--text-1); text-decoration: underline; font: inherit; }
 .streak-card { width: 100%; min-height: 0; font-size: inherit; color: inherit; }
 .streak-card > .row { display: flex; }
 .streak-card .streak-warn { display: block; margin-top: 10px; }
+
+/* ===== First-visit install screen ===== */
+.install-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: max(48px, env(safe-area-inset-top)) var(--s5) max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+.install-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s3); margin-top: 8vh; }
+.install-icon { border-radius: 22px; }
+.install-lead { color: var(--text-2); font-size: 16px; line-height: 1.5; margin: 0; text-align: center; max-width: 320px; align-self: center; }
+.install-actions { display: flex; flex-direction: column; gap: var(--s3); }
+.install-btn { width: 100%; }
+.install-skip { color: var(--text-2); font-size: 15px; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; }
+.install-steps { list-style: none; margin: 0 0 var(--s2); padding: 0; display: flex; flex-direction: column; gap: var(--s3); }
+.install-steps li { display: flex; align-items: center; gap: var(--s3); background: var(--surface-1); border-radius: 16px; padding: 14px 16px; font-size: 16px; }
+.install-step-n { width: 28px; height: 28px; border-radius: 50%; background: var(--text-1); color: #000; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+.install-share { vertical-align: -3px; margin: 0 2px; }

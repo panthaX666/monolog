@@ -3,8 +3,16 @@
 Everything that changed in the app, newest first. Each version also shows up on the
 [Releases](https://github.com/panthaX666/monolog/releases) page.
 
-Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
-features lands, the last one for smaller updates in between.
+Before 1.0, version numbers went `0.<milestone>.<update>`. From 1.0 on, the middle number goes up
+when a new feature lands and the last one for smaller changes and fixes.
+
+## [1.1.0] · 2026-10-04 · Install screen
+
+### Added
+- Opening the site in a browser now shows an install screen first, with a big **Install Monolog** button that brings up the phone's own install dialog. No more digging through Chrome's menu.
+- On iPhone, where install buttons aren't allowed, it shows the 3 Safari steps (Share, Add to Home Screen, Add) instead. Other browsers get short menu steps.
+- "Use in browser instead" hides it for good. The Install card on Home is still there as a backup. Inside the installed app the screen never shows.
+- The GitHub page has an **Install Monolog** button that opens the site.
 
 ## [1.0.3] · 2026-10-04 · Streak card opens History
 
