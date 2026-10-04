@@ -59,3 +59,24 @@ for (const size of SIZES) {
     await fullyVisible(page, page.getByRole('button', { name: 'Back to Home' }));
   });
 }
+
+// Nothing sticks out of its card sideways (regression: the selected check-in day overflowed).
+for (const size of [SIZES[0]!, SIZES[3]!]) {
+  test(`settings controls fit inside their cards at ${size.width}px`, async ({ page }) => {
+    await page.setViewportSize(size);
+    await page.goto('./#/settings');
+    await expect(page.getByRole('group', { name: 'Weekly check-in day' })).toBeVisible();
+    const overflow = await page.evaluate(() =>
+      [...document.querySelectorAll('.card')].flatMap((card) => {
+        const c = card.getBoundingClientRect();
+        return [...card.querySelectorAll('button, input, .seg')]
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && (r.right > c.right + 0.5 || r.left < c.left - 0.5);
+          })
+          .map((el) => el.textContent?.trim() || el.getAttribute('aria-label') || el.className);
+      }),
+    );
+    expect(overflow).toEqual([]);
+  });
+}

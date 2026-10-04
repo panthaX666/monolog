@@ -6,6 +6,11 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Before 1.0, version numbers went `0.<milestone>.<update>`. From 1.0 on, the middle number goes up
 when a new feature lands and the last one for smaller changes and fixes.
 
+## [1.1.1] · 2026-10-04 · Check-in day fix
+
+### Fixed
+- Settings: the weekly check-in day picker no longer sticks out past the edge of its card. The 7 days now share the width evenly on any phone size.
+
 ## [1.1.0] · 2026-10-04 · Install screen
 
 ### Added
