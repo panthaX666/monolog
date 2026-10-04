@@ -29,16 +29,32 @@ export function subtitle(e: Exercise): string {
   return [...groups, ...e.equipment.map((q) => EQUIPMENT_LABEL[q])].join(' · ') || 'Cardio';
 }
 
-/** All exercises plus the last day each was logged. */
+/**
+ * All exercises plus the last day each was logged. Read from workouts and their exercise lists, not
+ * every set: finished workouts only keep exercises with logged sets (finish/tidy remove the rest),
+ * so only the open workout needs a look at its sets.
+ */
 export function useExerciseIndex(): { exercises: Exercise[]; last: Map<string, DayKey> } | undefined {
   return useLiveQuery(async () => {
     const db = getDb();
-    const exercises = await db.exercises.toArray();
+    const [exercises, sessions, ses] = await Promise.all([
+      db.exercises.toArray(),
+      db.sessions.toArray(),
+      db.sessionExercises.toArray(),
+    ]);
+    const open = sessions.filter((s) => s.endedAt === null).map((s) => s.id);
+    const openLogged = new Set(
+      (await db.sets.where('sessionId').anyOf(open).toArray()).filter((s) => s.loggedAt).map((s) => s.sessionExerciseId),
+    );
+    const dayOf = new Map(sessions.map((s) => [s.id, s.dayKey]));
+    const isOpen = new Set(open);
     const last = new Map<string, DayKey>();
-    await db.sets.where('loggedAt').above('').each((s) => {
-      const prev = last.get(s.exerciseId);
-      if (!prev || s.dayKey > prev) last.set(s.exerciseId, s.dayKey);
-    });
+    for (const se of ses) {
+      if (isOpen.has(se.sessionId) && !openLogged.has(se.id)) continue;
+      const day = dayOf.get(se.sessionId);
+      const prev = last.get(se.exerciseId);
+      if (day && (!prev || day > prev)) last.set(se.exerciseId, day);
+    }
     return { exercises, last };
   }, []);
 }

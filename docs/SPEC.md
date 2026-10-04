@@ -86,7 +86,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 |---|---|---|
 | N1 | Home | Date header + ⚙ · Streak card (count, dot row, gold run pill, rest-days x/3) · This-week coverage · Body-weight card + sparkline · Recent records · Check-in banner (on check-in day) · **[Rest day] [▶ Start workout]** (or Resume) |
 | N2 | Active workout | Header: [‹ Home] · elapsed · **rest timer chip (top-right)** · exercise cards · full-width **[＋ Add exercise]** under the cards · Discard · **Finish** pinned at the bottom |
-| N3 | Exercise picker | Search · muscle chips · equipment chips · Recent · A–Z · "＋ Create '…'" · long-press multi-select |
+| N3 | Exercise picker | Search · muscle chips · equipment chips · Recent · A–Z · "＋ Create '…'" · hold an exercise (or tap Select) to pick several, then "Add N exercises" |
 | N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · one button: [Enter] on the first field, [✓ Log set] on the second |
 | N5 | Rest timer | Chip: idle `⏱ 1:30 ▶`, running (white) countdown, done (pulse + vibrate) |
 | N6 | Celebration | Large gold card (D41) |
@@ -151,7 +151,7 @@ Settings → Export → JSON via share sheet. Banner every 10 workouts without a
 | `surface-3` | `#2A2A2E` | Borders, pressed, empty bars |
 | `text-1` | `#FFFFFF` | Primary text, primary button fill |
 | `text-2` | `#A1A1A6` | Secondary text |
-| `text-3` | `#6B6B70` | Ghost (pre-filled) values, hints |
+| `text-3` | `#8A8A8F` | Ghost (pre-filled) values, hints (lifted from #6B6B70 in v1.0.0 to pass WCAG AA contrast) |
 | `accent` | `#F5C542` | **Records + streak only** |
 | `accent-dim` | `rgba(245,197,66,.14)` | Streak run pill, glows |
 | `danger` | `#FF453A` | Failure marker, destructive confirms |

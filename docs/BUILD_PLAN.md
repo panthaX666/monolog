@@ -6,7 +6,7 @@ Two rules the whole way through:
 - Every milestone ends with a working version live on GitHub Pages that installs on the phone.
 - The tricky logic (records, streaks, units, data migrations) gets tests first. If a test fails, nothing gets published.
 
-Milestones M0 to M4 are done. See the [changelog](../CHANGELOG.md) for what each one shipped.
+Milestones M0 to M5 are done, which makes v1.0.0. See the [changelog](../CHANGELOG.md) for what each one shipped.
 
 ---
 
@@ -59,11 +59,12 @@ Get an empty app onto the phone that installs and updates itself, before buildin
 4. Home cards: coverage, body weight with a small trend line, recent records.
 5. Timed and cardio exercises and their records (time, distance, pace).
 
-## M5: Polish (next, will be v1.0.0)
-1. Backup reminder every 10 workouts (already done in M2). Share a workout as an image (done in v0.4.6).
-2. Drag to reorder exercises. Long press to pick several exercises at once in the picker.
-3. Test it with 3 years of fake data to make sure it stays fast. Accessibility and reduced motion check.
-4. Empty states and edge cases. If the app crashes, show a screen that still lets you save a backup.
+## M5: Polish ✅ (v1.0.0)
+1. Backup reminder every 10 workouts (done in M2). Share a workout as an image (v0.4.6).
+2. Reorder exercises in a workout (drag the ≡ handle or use the arrows). Pick several exercises at once in the picker (hold one, or tap Select).
+3. Speed test with 3 years of generated training (about 50,000 sets), restored through Settings like a real backup. It found slow spots, which were fixed: records, trained days, weekly coverage, the exercise list and History no longer read every set ever logged.
+4. Accessibility check (axe, WCAG AA) on every main screen. Fixed low-contrast grey text and the calendar's screen reader structure. Reduced motion was already respected.
+5. Empty states checked on a fresh install. If a screen ever crashes, a "Something broke" screen still lets you save a backup and go Home.
 
 ## Later (Release 2, Play Store)
 A Capacitor build with real notifications (rest timer on the lock screen, weekly check-in), onboarding, a bigger exercise list, a trademark check, maybe a paid unlock, and importing from Strong or Hevy.

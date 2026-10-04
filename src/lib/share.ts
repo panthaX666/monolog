@@ -6,6 +6,7 @@ import { GROUP_LABEL, GROUPS, MUSCLE_GROUP } from '../domain/muscles';
 import { dayStatus, type DayStatus } from '../domain/streak';
 import type { DayKey, Exercise, Unit, WorkoutSet } from '../domain/types';
 import { displayWeight } from '../domain/units';
+import { download } from './download';
 import { formatDuration } from './format';
 
 // Share a workout as a 1080×1350 image (card "A: full log"): muscles, stats, every working set,
@@ -41,7 +42,8 @@ export async function loadShareData(db: MonologDB, sessionId: string, unit: Unit
   const recordSetIds = new Set(
     (await db.recordEvents.where('setId').anyOf(sets.map((s) => s.id)).toArray()).map((r) => r.setId),
   );
-  const [streak, trained, rest] = await Promise.all([getStreak(db, now), trainedDays(db), db.restDays.toArray()]);
+  const [trained, rest] = await Promise.all([trainedDays(db), db.restDays.toArray()]);
+  const streak = await getStreak(db, now, trained);
   const restSet = new Set(rest.map((r) => r.dayKey));
   const today = toDayKey(now);
 
@@ -341,11 +343,6 @@ export async function shareWorkoutImage(data: ShareData): Promise<boolean> {
       // Anything else (e.g. share not allowed here): fall through to a download.
     }
   }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = file.name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  download(blob, file.name);
   return true;
 }

@@ -6,6 +6,24 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [1.0.0] · 2026-10-04 · Version 1
+
+The last milestone (M5). Everything planned for the first release is in.
+
+### Added
+- Reorder exercises in a workout: tap an exercise's ⋯ menu, then **Reorder exercises**. Hold the ≡ handle and drag, or use the ↑ ↓ arrows.
+- Pick several exercises at once: in Add exercise, hold one exercise (or tap **Select**), tap the others, then **Add 3 exercises**. They're added in the order you picked them.
+- A "Something broke" screen if a screen ever crashes, with **Save backup** and **Go Home**, so your data is never stuck.
+
+### Changed
+- Much faster with lots of history. Tested with 3 years of training (about 50,000 sets): Home opens about 7× faster, the exercise list and exercise pages about 4× faster, and logging a set stays quick. Records are now worked out in one pass instead of comparing every set with every earlier one.
+- History only loads the month you're looking at.
+- The faintest grey text is a bit lighter, so hints and pre-filled numbers are easier to read and pass accessibility contrast checks.
+- An exercise with no workouts yet says so on its Chart tab, instead of "No data in this range".
+
+### Fixed
+- Screen readers now read the History calendar correctly.
+
 ## [0.4.6] · 2026-10-03 · Share a workout
 
 ### Added

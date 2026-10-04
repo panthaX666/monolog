@@ -1,5 +1,6 @@
 import { computeCoverage, type CoverageSession, type GroupCoverage } from '../domain/coverage';
-import { addDays, isValidDayKey, toDayKey } from '../domain/dates';
+import { addDays, isValidDayKey, toDayKey, weekStart } from '../domain/dates';
+import { GROUPS, MUSCLE_GROUP, type MuscleGroup } from '../domain/muscles';
 import { computeRecords, isEligible } from '../domain/records';
 import { canLogRestDay, computeStreak, type Streak } from '../domain/streak';
 import {
@@ -351,6 +352,17 @@ export async function addExerciseToSession(
   });
 }
 
+/** Put a session's exercises in the given order (ids of its session exercises, first to last). */
+export async function reorderSessionExercises(db: MonologDB, sessionId: ID, orderedIds: ID[]): Promise<void> {
+  await db.transaction('rw', db.sessionExercises, async () => {
+    const ses = await db.sessionExercises.where('sessionId').equals(sessionId).toArray();
+    const known = new Set(ses.map((se) => se.id));
+    if (orderedIds.length !== ses.length || !orderedIds.every((id) => known.has(id)))
+      throw new RepoError('invalid', 'The exercise list changed. Try again.');
+    await Promise.all(orderedIds.map((id, order) => db.sessionExercises.update(id, { order })));
+  });
+}
+
 export async function removeExerciseFromSession(db: MonologDB, sessionExerciseId: ID): Promise<void> {
   await db.transaction('rw', [db.sessionExercises, db.sets, db.exercises, db.recordEvents], async () => {
     const se = await must(db.sessionExercises.get(sessionExerciseId), 'Session exercise');
@@ -507,18 +519,22 @@ export async function recentRecords(db: MonologDB, limit = 5): Promise<RecordEve
 
 // ───────────────────────── Streak, rest days, coverage ─────────────────────────
 
-/** Days with at least one logged working set. */
+/**
+ * Days with at least one logged working set. Reads the distinct days from the dayKey index (keys
+ * only), then just enough of each day to find one such set, instead of every set ever logged.
+ */
 export async function trainedDays(db: MonologDB): Promise<Set<DayKey>> {
-  const days = new Set<DayKey>();
-  await db.sets.where('loggedAt').above('').each((s) => {
-    if (isEligible(s)) days.add(s.dayKey);
+  return db.transaction('r', db.sets, async () => {
+    const days = (await db.sets.orderBy('dayKey').uniqueKeys()) as DayKey[];
+    const hits = await Promise.all(days.map((d) => db.sets.where('dayKey').equals(d).filter(isEligible).first()));
+    return new Set(days.filter((_, i) => hits[i]));
   });
-  return days;
 }
 
-export async function getStreak(db: MonologDB, now: Date = new Date()): Promise<Streak> {
-  const [trained, rest] = await Promise.all([trainedDays(db), db.restDays.toArray()]);
-  return computeStreak({ trainedDays: trained, restDays: rest.map((r) => r.dayKey), today: toDayKey(now) });
+/** Pass `trained` when the caller already has it, to avoid reading it twice. */
+export async function getStreak(db: MonologDB, now: Date = new Date(), trained?: Set<DayKey>): Promise<Streak> {
+  const [days, rest] = await Promise.all([trained ?? trainedDays(db), db.restDays.toArray()]);
+  return computeStreak({ trainedDays: days, restDays: rest.map((r) => r.dayKey), today: toDayKey(now) });
 }
 
 export async function logRestDay(db: MonologDB, dayKey: DayKey, now: Date = new Date()): Promise<void> {
@@ -539,15 +555,24 @@ export async function removeRestDay(db: MonologDB, dayKey: DayKey, now: Date = n
 }
 
 export async function getCoverage(db: MonologDB, now: Date = new Date()): Promise<GroupCoverage[]> {
-  const [sets, exercises] = await Promise.all([db.sets.where('loggedAt').above('').toArray(), db.exercises.toArray()]);
+  const exercises = await db.exercises.toArray();
   const byId = new Map(exercises.map((e) => [e.id, e]));
   const sessions = new Map<ID, { dayKey: DayKey; exIds: Set<ID> }>();
-  for (const s of sets) {
-    if (!isEligible(s)) continue;
-    const entry = sessions.get(s.sessionId) ?? { dayKey: s.dayKey, exIds: new Set<ID>() };
-    entry.exIds.add(s.exerciseId);
-    sessions.set(s.sessionId, entry);
-  }
+  // Newest first; stop once this week is covered and every group's latest workout has been seen
+  // (that's all coverage needs), instead of reading years of sets.
+  const start = weekStart(toDayKey(now));
+  const seen = new Set<MuscleGroup>();
+  await db.sets
+    .orderBy('dayKey')
+    .reverse()
+    .until((s) => s.dayKey < start && seen.size === GROUPS.length)
+    .each((s) => {
+      if (!isEligible(s)) return;
+      for (const m of byId.get(s.exerciseId)?.primaryMuscles ?? []) seen.add(MUSCLE_GROUP[m]);
+      const entry = sessions.get(s.sessionId) ?? { dayKey: s.dayKey, exIds: new Set<ID>() };
+      entry.exIds.add(s.exerciseId);
+      sessions.set(s.sessionId, entry);
+    });
   const input: CoverageSession[] = [...sessions.values()].map(({ dayKey, exIds }) => ({
     dayKey,
     exercises: [...exIds].flatMap((id) => {

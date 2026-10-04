@@ -99,7 +99,8 @@ export function useHomeStreak(today: string): HomeStreak | undefined {
   return useLiveQuery(async () => {
     const db = getDb();
     const now = new Date();
-    const [streak, trained, rest] = await Promise.all([getStreak(db, now), trainedDays(db), db.restDays.toArray()]);
+    const [trained, rest] = await Promise.all([trainedDays(db), db.restDays.toArray()]);
+    const streak = await getStreak(db, now, trained);
     const restSet = new Set(rest.map((r) => r.dayKey));
     const days = Array.from({ length: 14 }, (_, i) => {
       const day = addDays(today, i - 13);

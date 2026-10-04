@@ -18,6 +18,7 @@ import {
   logSet,
   recentRecords,
   removeExerciseFromSession,
+  reorderSessionExercises,
   repeatSession,
   RepoError,
   restoreSet,
@@ -246,6 +247,16 @@ describe('records in the database', () => {
     await removeExerciseFromSession(db, card.id);
     expect(await db.recordEvents.where('exerciseId').equals(PUSH).count()).toBe(0);
     expect(await db.recordEvents.where('exerciseId').equals(RAISE).count()).toBe(1);
+  });
+
+  it('reorders the exercises in a workout and refuses a stale list', async () => {
+    const s = await startSession(db, at('2026-09-30'));
+    const a = (await addExerciseToSession(db, s.id, PUSH)).sessionExercise;
+    const b = (await addExerciseToSession(db, s.id, RAISE)).sessionExercise;
+    await reorderSessionExercises(db, s.id, [b.id, a.id]);
+    const order = (await db.sessionExercises.where('sessionId').equals(s.id).sortBy('order')).map((x) => x.id);
+    expect(order).toEqual([b.id, a.id]);
+    await expect(reorderSessionExercises(db, s.id, [a.id])).rejects.toThrow(/changed/);
   });
 
   it('"＋ Add set" copies the last set as a working set', async () => {

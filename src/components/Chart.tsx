@@ -23,6 +23,8 @@ interface LineChartProps {
   /** Flip the y-axis so "up" means better when lower values are better (pace). */
   invert?: boolean;
   height?: number;
+  /** Shown when there are no points (default: nothing in the chosen range). */
+  empty?: string;
 }
 
 const PAD = { top: 12, right: 12, bottom: 26, left: 44 };
@@ -43,12 +45,12 @@ function useWidth<T extends HTMLElement>() {
   return [ref, width] as const;
 }
 
-export function LineChart({ label, points, line, format, invert = false, height = 190 }: LineChartProps) {
+export function LineChart({ label, points, line, format, invert = false, height = 190, empty }: LineChartProps) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const [active, setActive] = useState<number | null>(null);
   const titleId = useId();
 
-  if (points.length === 0) return <p className="t-meta chart-empty">No data in this range yet.</p>;
+  if (points.length === 0) return <p className="t-meta chart-empty">{empty ?? 'No data in this range yet.'}</p>;
 
   const all = [...points, ...(line ?? [])];
   const xs = points.map((p) => ms(p.day));

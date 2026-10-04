@@ -40,7 +40,7 @@ test('history lists the workout; editing it recomputes records silently and tidi
   await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
 
   // Today is marked trained on the calendar; the workout is listed.
-  await expect(page.getByRole('grid').getByRole('button', { name: /, trained$/ })).toHaveCount(1);
+  await expect(page.getByRole('group', { name: 'Month calendar' }).getByRole('button', { name: /, trained$/ })).toHaveCount(1);
   const item = page.getByRole('button', { name: /^Workout / });
   await expect(item).toHaveCount(1);
   await expect(item).toContainText('Rope Tricep Pushdown · Bench Press · 3 sets');

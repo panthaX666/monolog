@@ -6,6 +6,7 @@ import './styles/base.css';
 import './styles/app.css';
 import './lib/install';
 import { App } from './App';
+import { CrashTest, ErrorBoundary } from './components/ErrorBoundary';
 import { getDb } from './data/db';
 import { ensureReady } from './data/repo';
 import { requestPersistence } from './lib/storage';
@@ -16,6 +17,9 @@ void requestPersistence();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <CrashTest />
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );

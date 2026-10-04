@@ -330,6 +330,7 @@ function ChartTab({ ex, sets, events, unit }: { ex: Exercise; sets: WorkoutSet[]
         points={points}
         format={fmt}
         invert={LOWER_IS_BETTER.includes(metric)}
+        empty={all.length ? undefined : 'No workouts with this exercise yet. The chart fills in as you log it.'}
       />
       {points.length > 0 && (
         <p className="t-meta" style={{ margin: '8px 0 0' }}>

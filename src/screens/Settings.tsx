@@ -14,6 +14,7 @@ import { useSettings } from '../data/hooks';
 import { updateSettings } from '../data/repo';
 import { formatClock, formatDay, plural } from '../lib/format';
 import { navigate } from '../lib/route';
+import { download } from '../lib/download';
 import { requestPersistence, type PersistState } from '../lib/storage';
 import { toDayKey } from '../domain/dates';
 import { METRICS } from '../domain/body';
@@ -26,17 +27,6 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
       <span />
     </button>
   );
-}
-
-function download(text: string, name: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 export function Settings() {

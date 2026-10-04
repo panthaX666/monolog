@@ -2,8 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { getDb } from '../data/db';
 import { useToday } from '../data/hooks';
+import { trainedDays } from '../data/repo';
 import { addDays, weekday } from '../domain/dates';
-import { isEligible } from '../domain/records';
 import { streakSegments } from '../domain/streak';
 import type { DayKey, Session } from '../domain/types';
 import { formatDuration, formatTime, formatWeekday, plural } from '../lib/format';
@@ -35,20 +35,25 @@ export function History() {
   const [ym, setYm] = useState(() => ({ y: Number(today.slice(0, 4)), m: Number(today.slice(5, 7)) - 1 }));
   const [selected, setSelected] = useState<DayKey | null>(null);
 
+  // Only the month on screen is read in full; trained days (for the streak bars) come from the
+  // dayKey index, so this stays quick with years of history.
+  const monthPrefix = `${ym.y}-${pad2(ym.m + 1)}`;
   const data = useLiveQuery(async () => {
     const db = getDb();
-    const [sessions, sets, exercises, events, restDays] = await Promise.all([
-      db.sessions.toArray(),
-      db.sets.where('loggedAt').above('').toArray(),
+    const from = `${monthPrefix}-01`;
+    const to = `${monthPrefix}-31`;
+    const [trained, sessions, sets, exercises, events, restDays] = await Promise.all([
+      trainedDays(db),
+      db.sessions.where('dayKey').between(from, to, true, true).toArray(),
+      db.sets.where('dayKey').between(from, to, true, true).toArray(),
       db.exercises.toArray(),
-      db.recordEvents.toArray(),
+      db.recordEvents.where('dayKey').between(from, to, true, true).toArray(),
       db.restDays.toArray(),
     ]);
     const exName = new Map(exercises.map((e) => [e.id, e.name]));
-    const trained = new Set<DayKey>();
     const bySession = new Map<string, { exIds: string[]; sets: number }>();
-    for (const s of sets) {
-      if (isEligible(s)) trained.add(s.dayKey);
+    const logged = sets.filter((s) => s.loggedAt).sort((a, b) => (a.loggedAt! < b.loggedAt! ? -1 : 1)); // in the order done
+    for (const s of logged) {
       const g = bySession.get(s.sessionId) ?? { exIds: [], sets: 0 };
       if (!g.exIds.includes(s.exerciseId)) g.exIds.push(s.exerciseId);
       if (s.kind === 'working') g.sets += 1;
@@ -81,10 +86,9 @@ export function History() {
       for (let d = seg.start; d <= seg.end; d = addDays(d, 1)) inRun.set(d, seg);
     }
     return { rows, trained, rest, inRun };
-  }, [today]);
+  }, [today, monthPrefix]);
 
   const cells = monthDays(ym.y, ym.m);
-  const monthPrefix = `${ym.y}-${pad2(ym.m + 1)}`;
   const isCurrentMonth = today.startsWith(monthPrefix);
   const shift = (dir: 1 | -1) => {
     setSelected(null);
@@ -126,7 +130,7 @@ export function History() {
             ›
           </button>
         </div>
-        <div className="cal-grid" role="grid">
+        <div className="cal-grid" role="group" aria-label="Month calendar">
           {WEEKDAYS.map((d, i) => (
             <span key={i} className="cal-head">
               {d}

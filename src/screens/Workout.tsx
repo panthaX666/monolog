@@ -5,6 +5,7 @@ import { ExercisePicker } from '../components/ExercisePicker';
 import { fieldsFor, NumberPad, type PadField } from '../components/NumberPad';
 import { formatKm, formatPace, formatSeconds } from '../domain/measure';
 import { RecordsPopover } from '../components/RecordsPopover';
+import { ReorderSheet } from '../components/ReorderSheet';
 import { ShareButton } from '../components/ShareButton';
 import { RestChip } from '../components/RestChip';
 import { Dialog, Sheet, Snackbar } from '../components/Sheet';
@@ -20,6 +21,7 @@ import {
   tidySession,
   logSet,
   removeExerciseFromSession,
+  reorderSessionExercises,
   RepoError,
   restoreSet,
   unlogSet,
@@ -46,6 +48,7 @@ type Overlay =
   | { kind: 'discard' }
   | { kind: 'repeatBlocked' }
   | { kind: 'remove'; seId: string }
+  | { kind: 'reorder' }
   | null;
 
 /** Serialise writes so a quick "type then ✓" always logs what was typed. */
@@ -81,7 +84,10 @@ function celebrationFor(ev: RecordEvent, card: CardData, set: WorkoutSet, unit: 
       return {
         ...base,
         delta: `+${plural(n, 'rep')}`,
-        before: { label: beforeLabel, value: before ? `${weightText(before, unit, bw)} × ${ev.before.value}` : `${ev.before.value}` },
+        before: {
+          label: beforeLabel,
+          value: before ? `${weightText(before, unit, bw)} × ${ev.before.value}` : `${ev.before.value}`,
+        },
         after: { label: today, value: `${weightText(set, unit, bw)} × ${set.reps}` },
       };
     }
@@ -157,7 +163,10 @@ export function Workout({ editId }: { editId?: string } = {}) {
   }, [snack]);
 
   const unitFor = useCallback((card: CardData): Unit => card.exercise.unit ?? settings.unit, [settings.unit]);
-  const restFor = useCallback((card: CardData) => card.exercise.restSec ?? settings.restDefaultSec, [settings.restDefaultSec]);
+  const restFor = useCallback(
+    (card: CardData) => card.exercise.restSec ?? settings.restDefaultSec,
+    [settings.restDefaultSec],
+  );
 
   const cards = useMemo(() => data?.cards ?? [], [data]);
   const findSet = (id: string) => {
@@ -174,7 +183,11 @@ export function Workout({ editId }: { editId?: string } = {}) {
   const session = data.session;
   const elapsed = (now - Date.parse(session.startedAt)) / 1000;
   const loggedAll = cards.flatMap((c) => c.sets.filter((s) => s.loggedAt));
-  const lastLoggedAt = loggedAll.map((s) => s.loggedAt!).sort().pop() ?? null;
+  const lastLoggedAt =
+    loggedAll
+      .map((s) => s.loggedAt!)
+      .sort()
+      .pop() ?? null;
   const stale = !staleDismissed && now - Date.parse(session.startedAt) > STALE_MS;
 
   const patch = (set: WorkoutSet, p: SetPatch) => {
@@ -206,10 +219,13 @@ export function Workout({ editId }: { editId?: string } = {}) {
         const fresh = (await db.sets.get(set.id)) ?? set;
         const type = card.exercise.type;
         const missing = fieldsFor(type).find((f) =>
-          f === 'weight' ? type === 'weight_reps' && fresh.weight == null
-          : f === 'reps' ? !fresh.reps
-          : f === 'duration' ? !fresh.durationSec && !(type === 'cardio' && fresh.distanceM)
-          : !fresh.distanceM && !fresh.durationSec,
+          f === 'weight'
+            ? type === 'weight_reps' && fresh.weight == null
+            : f === 'reps'
+              ? !fresh.reps
+              : f === 'duration'
+                ? !fresh.durationSec && !(type === 'cardio' && fresh.distanceM)
+                : !fresh.distanceM && !fresh.durationSec,
         );
         setPad({ setId: set.id, field: missing ?? fieldsFor(type)[0] });
       } else throw e;
@@ -353,11 +369,19 @@ export function Workout({ editId }: { editId?: string } = {}) {
 
       <footer className="footer">
         {live ? (
-          <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setOverlay({ kind: 'finish' })}>
+          <button
+            className="btn btn-secondary"
+            style={{ width: '100%' }}
+            onClick={() => setOverlay({ kind: 'finish' })}
+          >
             Finish workout
           </button>
         ) : (
-          <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => navigate('#/history')}>
+          <button
+            className="btn btn-secondary"
+            style={{ width: '100%' }}
+            onClick={() => navigate('#/history')}
+          >
             Done
           </button>
         )}
@@ -415,10 +439,14 @@ export function Workout({ editId }: { editId?: string } = {}) {
         <ExercisePicker
           excludeIds={new Set(cards.map((c) => c.exercise.id))}
           onClose={() => setOverlay(null)}
-          onPick={(exerciseId) => {
+          onPick={(exerciseIds) => {
             setOverlay(null);
-            void enqueue(() => addExerciseToSession(db, session.id, exerciseId)).then(() =>
-              requestAnimationFrame(() => document.querySelector('.workout-scroll')?.scrollTo({ top: 1e6, behavior: 'smooth' })),
+            void enqueue(async () => {
+              for (const id of exerciseIds) await addExerciseToSession(db, session.id, id);
+            }).then(() =>
+              requestAnimationFrame(() =>
+                document.querySelector('.workout-scroll')?.scrollTo({ top: 1e6, behavior: 'smooth' }),
+              ),
             );
           }}
         />
@@ -439,7 +467,11 @@ export function Workout({ editId }: { editId?: string } = {}) {
                   <button
                     key={u}
                     className={unitFor(overlayCard) === u ? 'on' : ''}
-                    onClick={() => void updateExercise(db, overlayCard.exercise.id, { unit: u === settings.unit ? null : u })}
+                    onClick={() =>
+                      void updateExercise(db, overlayCard.exercise.id, {
+                        unit: u === settings.unit ? null : u,
+                      })
+                    }
                   >
                     {u}
                   </button>
@@ -452,14 +484,42 @@ export function Workout({ editId }: { editId?: string } = {}) {
                 defaultValue={overlayCard.exercise.pinnedNote}
                 placeholder="e.g. Seat 4, rope attachment"
                 maxLength={120}
-                onBlur={(e) => void updateExercise(db, overlayCard.exercise.id, { pinnedNote: e.target.value.trim() })}
+                onBlur={(e) =>
+                  void updateExercise(db, overlayCard.exercise.id, { pinnedNote: e.target.value.trim() })
+                }
               />
             </label>
-            <button className="btn btn-danger" onClick={() => setOverlay({ kind: 'remove', seId: overlayCard.se.id })}>
+            {cards.length > 1 && (
+              <button className="btn btn-secondary" onClick={() => setOverlay({ kind: 'reorder' })}>
+                ⇅ Reorder exercises
+              </button>
+            )}
+            <button
+              className="btn btn-danger"
+              onClick={() => setOverlay({ kind: 'remove', seId: overlayCard.se.id })}
+            >
               Remove from workout
             </button>
           </div>
         </Sheet>
+      )}
+
+      {overlay?.kind === 'reorder' && (
+        <ReorderSheet
+          items={cards.map((c) => {
+            const logged = c.sets.filter((x) => x.loggedAt).length;
+            return {
+              id: c.se.id,
+              name: c.exercise.name,
+              detail: logged ? plural(logged, 'set') + ' logged' : plural(c.sets.length, 'set'),
+            };
+          })}
+          onClose={() => setOverlay(null)}
+          onSave={(ids) => {
+            setOverlay(null);
+            void enqueue(() => reorderSessionExercises(db, session.id, ids));
+          }}
+        />
       )}
 
       {overlay?.kind === 'remove' && overlayCard && (

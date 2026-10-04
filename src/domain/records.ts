@@ -95,15 +95,57 @@ export function detectRecord(type: ExerciseType, prior: WorkoutSet[], set: Worko
 }
 
 /**
+ * Same answers as `weightThen` over a growing history, in one pass: keeps the heaviest set and, per
+ * weight, the first set with the most of `measure`. Years of one exercise take milliseconds instead
+ * of comparing every set with every earlier one. (Measures are whole reps or seconds, so "first set
+ * with the highest value" matches `best`.)
+ */
+function weightThenTracker(measure: (s: WorkoutSet) => number | null, kind: 'reps' | 'duration') {
+  let heaviest: { set: WorkoutSet; value: number } | null = null;
+  const byWeight = new Map<number, { weight: number; set: WorkoutSet; value: number }>();
+  return {
+    check(set: WorkoutSet): Candidate | null {
+      const value = measure(set);
+      if (value == null || value <= 0 || !heaviest) return null;
+      if (higher(w(set), heaviest.value)) {
+        return { kind: 'weight', before: heaviest.set, beforeValue: heaviest.value, after: w(set) };
+      }
+      let top: { set: WorkoutSet; value: number } | null = null;
+      for (const b of byWeight.values()) {
+        if (b.weight < w(set) - EPS) continue;
+        if (!top || b.value > top.value || (b.value === top.value && compareChrono(b.set, top.set) < 0)) top = b;
+      }
+      if (top && higher(value, top.value)) return { kind, before: top.set, beforeValue: top.value, after: value };
+      return null;
+    },
+    add(set: WorkoutSet) {
+      const value = measure(set);
+      if (value == null) return;
+      if (!heaviest || higher(w(set), heaviest.value)) heaviest = { set, value: w(set) };
+      const key = Math.round(w(set) * 1000);
+      const b = byWeight.get(key);
+      if (!b || higher(value, b.value)) byWeight.set(key, { weight: b?.weight ?? w(set), set, value });
+    },
+  };
+}
+
+/**
  * All record events for one exercise. Sets of other exercises are ignored even if passed in.
  * The old app compared across exercises and showed false records; this can't.
  */
 export function computeRecords(exerciseId: string, type: ExerciseType, sets: WorkoutSet[]): RecordEvent[] {
   const ordered = sets.filter((s) => s.exerciseId === exerciseId && isEligible(s)).sort(compareChrono);
   const events: RecordEvent[] = [];
+  const tracker =
+    type === 'cardio'
+      ? null
+      : type === 'timed'
+        ? weightThenTracker((s) => s.durationSec, 'duration')
+        : weightThenTracker((s) => s.reps, 'reps');
   for (let i = 0; i < ordered.length; i++) {
     const set = ordered[i]!;
-    const hit = detectRecord(type, ordered.slice(0, i), set);
+    const hit = tracker ? tracker.check(set) : detectRecord(type, ordered.slice(0, i), set);
+    tracker?.add(set);
     if (!hit) continue;
     events.push({
       id: `rec:${set.id}`,

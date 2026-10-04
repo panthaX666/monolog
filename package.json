@@ -1,7 +1,7 @@
 {
   "name": "monolog",
   "private": true,
-  "version": "0.4.6",
+  "version": "1.0.0",
   "type": "module",
   "description": "A monochrome, offline-first gym tracker (PWA).",
   "scripts": {
@@ -23,6 +23,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.3",
