@@ -77,3 +77,8 @@ test('crash screen offers a backup and a way home', async ({ page }) => {
   await page.getByRole('button', { name: 'Go Home' }).click();
   await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 });
+
+test('tapping the streak card opens History', async ({ page }) => {
+  await page.getByRole('button', { name: /^Streak: 0 days/ }).click();
+  await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
+});

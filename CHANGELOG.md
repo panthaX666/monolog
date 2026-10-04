@@ -6,6 +6,11 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [1.0.3] · 2026-10-04 · Streak card opens History
+
+### Changed
+- Tap the streak card on Home to jump to History, where the calendar shows the whole streak. The card looks the same as before.
+
 ## [1.0.2] · 2026-10-04 · Cleaner streak calendar
 
 ### Changed

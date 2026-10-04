@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { BodyWeightCard, CheckInBanner, CoverageCard, CoverageSheet, RecordsCard } from '../components/HomeCards';
+import {
+  BodyWeightCard,
+  CheckInBanner,
+  CoverageCard,
+  CoverageSheet,
+  RecordsCard,
+} from '../components/HomeCards';
 import { Sheet } from '../components/Sheet';
 import { CheckInSheet } from './Body';
 import { getDb } from '../data/db';
@@ -45,47 +51,58 @@ function StreakCard({ today }: { today: string }) {
   const run = s.days.filter((d) => d.inStreak);
   const dot = (d: (typeof s.days)[number]) => {
     const cls =
-      d.day === today && d.status === 'empty' ? 'today' : d.status === 'trained' ? 't' : d.status === 'rest' ? 'r' : 'e';
+      d.day === today && d.status === 'empty'
+        ? 'today'
+        : d.status === 'trained'
+          ? 't'
+          : d.status === 'rest'
+            ? 'r'
+            : 'e';
     return <span key={d.day} className={`dot ${cls}`} title={d.day} />;
   };
 
   return (
-    <section className="card" aria-label="Streak">
-      <div className="row" style={{ alignItems: 'baseline' }}>
+    // Tapping the card opens History (the calendar shows the whole streak).
+    <button
+      className="card home-card streak-card"
+      onClick={() => navigate('#/history')}
+      aria-label={`Streak: ${s.current} ${s.current === 1 ? 'day' : 'days'}. Open History`}
+    >
+      <span className="row" style={{ alignItems: 'baseline' }}>
         <span className="t-label">Streak</span>
         {s.best > 0 && <span className="t-meta">best {s.best}</span>}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
+      </span>
+      <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
         <span className="t-display" data-testid="streak-count">
           {s.current}
         </span>
         <span className="t-h2" style={{ color: 'var(--text-2)' }}>
           {s.current === 1 ? 'day' : 'days'}
         </span>
-      </div>
-      <div className="dots" aria-hidden="true">
+      </span>
+      <span className="dots" aria-hidden="true">
         {before.map(dot)}
-        {run.length > 0 && <span className={`streak-run ${s.current >= 3 ? 'lit' : ''}`}>{run.map(dot)}</span>}
-      </div>
-      <div className="t-meta">
+        {run.length > 0 && (
+          <span className={`streak-run ${s.current >= 3 ? 'lit' : ''}`}>{run.map(dot)}</span>
+        )}
+      </span>
+      <span className="t-meta">
         ● trained&nbsp;&nbsp;○ rest
         {s.current > 0 && (
           <>
             &nbsp;·&nbsp;Rest days in a row: {s.restRun} / {MAX_REST_RUN}
           </>
         )}
-      </div>
+      </span>
       {s.yesterdayPending && (
-        <p className="t-meta warn" style={{ marginBottom: 0 }}>
+        <span className="t-meta warn streak-warn">
           Yesterday is empty. Log a workout or rest day for it before midnight to keep the streak.
-        </p>
+        </span>
       )}
       {s.current > 0 && s.restRun === MAX_REST_RUN && !s.todayDone && (
-        <p className="t-meta warn" style={{ marginBottom: 0 }}>
-          3 rest days in a row. Train today to keep the streak.
-        </p>
+        <span className="t-meta warn streak-warn">3 rest days in a row. Train today to keep the streak.</span>
       )}
-    </section>
+    </button>
   );
 }
 

@@ -612,3 +612,8 @@ button.link { color: var(--text-1); text-decoration: underline; font: inherit; }
 .crash { padding-top: var(--s8); }
 .crash p { margin: 0; line-height: 1.5; }
 .crash-details { white-space: pre-wrap; word-break: break-word; font-size: 12px; color: var(--text-2); max-height: 40vh; overflow: auto; }
+
+/* Home streak card is a button (opens History); keep it looking like the plain card it was. */
+.streak-card { width: 100%; min-height: 0; font-size: inherit; color: inherit; }
+.streak-card > .row { display: flex; }
+.streak-card .streak-warn { display: block; margin-top: 10px; }
