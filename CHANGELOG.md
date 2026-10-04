@@ -6,6 +6,11 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [1.0.1] · 2026-10-04 · White streak bars
+
+### Changed
+- Streaks of 3+ days are now a solid white bar instead of a faded yellow one, on Home and in the History calendar. The dots and dates on the bar turn black so they stay easy to read.
+
 ## [1.0.0] · 2026-10-04 · Version 1
 
 The last milestone (M5). Everything planned for the first release is in.

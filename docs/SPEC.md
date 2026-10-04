@@ -20,7 +20,7 @@ This was written before building and has been kept up to date since. The origina
 ### Design principles
 1. **Mid-workout logging comes first.** First set logged in ≤ 3 taps; typical set = 1 tap.
 2. **Sweaty-hand friendly.** Targets ≥ 40 px, primary actions ≥ 56 px, thumb zone at the bottom.
-3. **Monochrome with one meaning for colour.** Gold = progress (records, streak). Nothing else is gold.
+3. **Monochrome with one meaning for colour.** Gold = records. Nothing else is gold. Streak runs are solid white bars.
 4. **Your data is safe.** Crash-safe logging, tested schema migrations, one-tap backup.
 5. **Any progress is progress.** Rep records celebrate as loudly as weight records.
 
@@ -84,7 +84,7 @@ Persistent "● Resume workout · mm:ss" bar above tabs while a session is open.
 
 | ID | Screen | Contents |
 |---|---|---|
-| N1 | Home | Date header + ⚙ · Streak card (count, dot row, gold run pill, rest-days x/3) · This-week coverage · Body-weight card + sparkline · Recent records · Check-in banner (on check-in day) · **[Rest day] [▶ Start workout]** (or Resume) |
+| N1 | Home | Date header + ⚙ · Streak card (count, dot row, white run pill for 3+ days, rest-days x/3) · This-week coverage · Body-weight card + sparkline · Recent records · Check-in banner (on check-in day) · **[Rest day] [▶ Start workout]** (or Resume) |
 | N2 | Active workout | Header: [‹ Home] · elapsed · **rest timer chip (top-right)** · exercise cards · full-width **[＋ Add exercise]** under the cards · Discard · **Finish** pinned at the bottom |
 | N3 | Exercise picker | Search · muscle chips · equipment chips · Recent · A–Z · "＋ Create '…'" · hold an exercise (or tap Select) to pick several, then "Add N exercises" |
 | N4 | Number pad | KG field (−/+) · REPS field · 3×4 keys · one button: [Enter] on the first field, [✓ Log set] on the second |
