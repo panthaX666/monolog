@@ -431,12 +431,10 @@
 .calendar { margin-top: var(--s3); }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; margin-top: var(--s3); }
 .cal-head { text-align: center; font-size: 12px; font-weight: 600; color: var(--text-3); padding-bottom: 4px; }
-.cal-day { height: 44px; display: grid; place-items: center; position: relative; }
+.cal-day { height: 44px; display: grid; place-items: center; position: relative; z-index: 1; }
+/* Streak runs of 3+ days: one solid white pill per week row, behind the day numbers. */
+.cal-run { align-self: center; height: 34px; margin: 0 4px; border-radius: 17px; background: var(--text-1); }
 .cal-day:disabled { opacity: 0.35; }
-/* Streak runs of 3+ days are joined into one solid white bar; the days on it flip to black. */
-.cal-day.run::before { content: ''; position: absolute; left: -1px; right: -1px; top: 5px; bottom: 5px; background: var(--text-1); }
-.cal-day.run-l::before { left: 4px; border-top-left-radius: 17px; border-bottom-left-radius: 17px; }
-.cal-day.run-r::before { right: 4px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; }
 .cal-dot {
   position: relative;
   width: 34px;
@@ -453,10 +451,10 @@
 .cal-dot.rest { border: 2px solid var(--text-1); color: var(--text-1); }
 .cal-dot.today:not(.trained):not(.rest) { border: 2px dashed var(--text-3); }
 .cal-dot.small { width: 16px; height: 16px; }
-.cal-day.run .cal-dot { color: #000; }
-.cal-day.run .cal-dot.trained { background: #000; color: var(--text-1); }
-.cal-day.run .cal-dot.rest { border-color: #000; color: #000; }
-.cal-day.run .cal-dot.today:not(.trained):not(.rest) { border-color: #000; }
+/* On a streak bar, days are plain numbers (no circles): black for trained, grey for rest. */
+.cal-day.run .cal-dot { color: #000; background: none; border: none; font-weight: 700; font-size: 15px; }
+.cal-day.run .cal-dot.rest { color: #9a9aa0; font-weight: 600; }
+.cal-day.run .cal-dot.today:not(.trained):not(.rest) { border: 2px dashed #000; }
 .cal-day.sel .cal-dot { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cal-legend { margin-top: var(--s3); }
 .history-card { display: block; width: 100%; text-align: left; margin-top: var(--s3); font-size: 15px; }

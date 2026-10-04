@@ -29,6 +29,20 @@ function monthDays(year: number, month: number): (DayKey | null)[] {
   return cells;
 }
 
+/** Each week row's stretch of streak days, as [from, to] columns. */
+function runBars(cells: (DayKey | null)[], inRun: Map<DayKey, unknown> | undefined) {
+  const bars: { row: number; from: number; to: number }[] = [];
+  cells.forEach((day, i) => {
+    if (!day || !inRun?.has(day)) return;
+    const row = Math.floor(i / 7);
+    const col = i % 7;
+    const last = bars[bars.length - 1];
+    if (last && last.row === row && last.to === col - 1) last.to = col;
+    else bars.push({ row, from: col, to: col });
+  });
+  return bars;
+}
+
 /** History (SPEC N8): month calendar with joined streak bars, then that month's workouts. */
 export function History() {
   const today = useToday();
@@ -132,23 +146,29 @@ export function History() {
         </div>
         <div className="cal-grid" role="group" aria-label="Month calendar">
           {WEEKDAYS.map((d, i) => (
-            <span key={i} className="cal-head">
+            <span key={i} className="cal-head" style={{ gridRow: 1, gridColumn: i + 1 }}>
               {d}
             </span>
           ))}
+          {/* Streak bars: one rounded pill per week row, drawn behind the days. A streak that crosses
+              into another week or month ends rounded and starts rounded again on the next row. */}
+          {runBars(cells, data?.inRun).map((bar) => (
+            <span
+              key={`bar${bar.row}-${bar.from}`}
+              className="cal-run"
+              aria-hidden="true"
+              style={{ gridRow: bar.row + 2, gridColumn: `${bar.from + 1} / ${bar.to + 2}` }}
+            />
+          ))}
           {cells.map((day, i) => {
-            if (!day) return <span key={`x${i}`} />;
-            const col = i % 7;
+            if (!day) return null;
             const status = data?.trained.has(day) ? 'trained' : data?.rest.has(day) ? 'rest' : 'empty';
-            const run = data?.inRun.get(day);
-            const runCls = run
-              ? `run ${day === run.start || col === 0 ? 'run-l' : ''} ${day === run.end || col === 6 ? 'run-r' : ''}`
-              : '';
             const future = day > today;
             return (
               <button
                 key={day}
-                className={`cal-day ${runCls} ${selected === day ? 'sel' : ''}`}
+                className={`cal-day ${data?.inRun.has(day) ? 'run' : ''} ${selected === day ? 'sel' : ''}`}
+                style={{ gridRow: Math.floor(i / 7) + 2, gridColumn: (i % 7) + 1 }}
                 onClick={() => setSelected(selected === day ? null : day)}
                 disabled={future}
                 aria-label={`${formatWeekday(day)}${status !== 'empty' ? `, ${status}` : ''}`}

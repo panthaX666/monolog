@@ -6,6 +6,14 @@ Everything that changed in the app, newest first. Each version also shows up on 
 Version numbers go `0.<milestone>.<update>`. The middle number goes up when a big chunk of
 features lands, the last one for smaller updates in between.
 
+## [1.0.2] · 2026-10-04 · Cleaner streak calendar
+
+### Changed
+- History calendar: days on a streak are now plain numbers on the white bar, with no circles. Workout days are bold black, rest days are grey.
+- A streak that crosses into a new month now ends rounded on the last day and starts rounded again on the 1st, instead of being cut off.
+- Each week's part of a streak is drawn as one smooth bar, so there are no faint lines between days.
+- The Home streak card is unchanged.
+
 ## [1.0.1] · 2026-10-04 · White streak bars
 
 ### Changed
